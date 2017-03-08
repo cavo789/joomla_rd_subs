@@ -2,6 +2,18 @@
 
 Scripts for the [RD-Subs subscription management component for Joomla!](https://rd-media.org/joomla-subscriptions-management.html).
 
+## Before using it
+
+This script will migrate records (i.e. subscriptions) from CBSubs to RD-Subs.  You need first, manually, create your products in RD-Subs.
+
+So, let's take an example : 
+
+* you wish to move your current records for your plan "Premium" (which has the `ID 8` in CBSubs)
+* you need to create a new product in RD-Subs (let's say "Premium" too which has the `ID 1` in RD-Subs)
+* Then you can use the script
+
+The script won't create any product, will just move subscriptions from `CBSubs plan #8` to `RD-Subs product #1`.
+
 ## Use it
 
 Just copy the script  in the root folder of your Joomla website.  Use your FTP client to do this.
