@@ -128,57 +128,90 @@ class aeSecureFct
 
 class aeSecureMigrate
 {
-   public static function showTable($CB_Subs_ID)
-   {
-	    
+	
+    private $mysqli=null;
+	private $JConfig=null;
+    private $sFolder='';
+      
+   /**
+    * Class constructor : initialize a few private variables
+    *
+    * @return boolean
+    */
+    function __construct()
+    {
+        
 		if (isset($_SERVER['SCRIPT_FILENAME'])) {
 			// In case of this script isn't in the current folder but is a symbolic link.
 			// The folder should be the current folder and not the folder where the script is stored
-			$sFolder=str_replace('/', DS, dirname($_SERVER['SCRIPT_FILENAME'])).DS;
+			$this->sFolder=str_replace('/', DS, dirname($_SERVER['SCRIPT_FILENAME'])).DS;
 		} else {
-			$sFolder=__DIR__;
+			$this->sFolder=__DIR__;
 		}
-	   
-		if (!file_exists($sFileName=$sFolder.'configuration.php'))
+		
+		if (file_exists($sFileName=$this->sFolder.'configuration.php'))
 		{
-			echo '<p class="text-warning error">Please put this script in the same folder of your Joomla\'s <em>configuration.php</em> file i.e. in the root folder of your website.</p>';
-			die();
-			
-		} else { // if (!file_exists($sFileName=$sFolder.'configuration.php'))
 			
 			require_once($sFileName);
-			$JConfig = new JConfig();
-			
-			$sReturn='';
+			$this->JConfig = new JConfig();
 			
 			if (DEBUG===true) {
 				mysqli_report(MYSQLI_REPORT_STRICT);
 			}
 			
-			$mysqli = new mysqli($JConfig->host, $JConfig->user, $JConfig->password);
+			$this->mysqli = new mysqli($this->JConfig->host, $this->JConfig->user, $this->JConfig->password);
 			
 			if (mysqli_connect_errno()!==0) {
 				
 				echo '<p class="bg-danger error">Could not connect to mysql.</p>';
-				$mysqli->close();
-				die();
-				
+				$this->mysqli->close();
+				$this->mysqli=null;
+			
 			} else { // if (mysqli_connect_errno()!==0)
 				
 				// Be sure to work on the correct database
-				mysqli_select_db($mysqli, $JConfig->db);
+				mysqli_select_db($this->mysqli, $this->JConfig->db);
 				
 			} // if (mysqli_connect_errno()!==0)
 				
-		} // if (!file_exists($sFileName=$sFolder.'configuration.php'))
+		} // if (file_exists($sFileName=$this->sFolder.'configuration.php'))
 			
+        return true;
+		
+    } // function __construct()
+	
+	/**
+	 * Release
+	 */
+    function __destructor()
+	{
+		
+		unset($this->JConfig);
+		$this->mysqli->close();
+		unset($this->mysqli);
+		
+		return true;
+		
+	}
+   
+	public function showTable($CB_Subs_ID)
+	{
+	    
+		if ($this->mysqli===null)
+		{
+			echo '<p class="text-warning error">Please put this script in the same folder of your Joomla\'s <em>configuration.php</em> file i.e. in the root folder of your website.</p>';
+			die();
+		} 
+				
+		$sReturn='';
+				
 		// Check the presence of CBSubs
 		
 		$sSQL="SELECT * FROM INFORMATION_SCHEMA.TABLES ".
-			"WHERE (TABLE_SCHEMA LIKE '".$JConfig->db."') AND ".
-			"(TABLE_NAME='".$JConfig->dbprefix."cbsubs_subscriptions')";
+			"WHERE (TABLE_SCHEMA LIKE '".$this->JConfig->db."') AND ".
+			"(TABLE_NAME='".$this->JConfig->dbprefix."cbsubs_subscriptions')";
 
-        if ($mysqli->query($sSQL)) 
+        if ($this->mysqli->query($sSQL)) 
         {
 			
 			$sSQL = "SELECT P.name AS product, user_id, U.name AS username, CAST(subscription_date AS date) AS created, ".
@@ -186,12 +219,12 @@ class aeSecureMigrate
 			   "CASE WHEN (expiry_date < Now()) THEN 0 ELSE 1 END AS status ".
 			   //$RD_Subs_ID." AS product_id, 0 AS payment_id, 0 As reminder_sent, ".
 			   //"0 AS ordercode, 0 AS order_id, 1 AS ordercount ".
-               "FROM ".$JConfig->dbprefix."cbsubs_subscriptions CB ".
-			   "INNER JOIN ".$JConfig->dbprefix."cbsubs_plans P ON CB.plan_id = P.id ".
-			   "INNER JOIN ".$JConfig->dbprefix."users U ON CB.user_id = U.id ".
+               "FROM ".$this->JConfig->dbprefix."cbsubs_subscriptions CB ".
+			   "INNER JOIN ".$this->JConfig->dbprefix."cbsubs_plans P ON CB.plan_id = P.id ".
+			   "INNER JOIN ".$this->JConfig->dbprefix."users U ON CB.user_id = U.id ".
                "WHERE CB.plan_id = ".$CB_Subs_ID.";";
 
-			if ($results = $mysqli->query($sSQL)) 
+			if ($results = $this->mysqli->query($sSQL)) 
 			{
 				
 				// For display purpose
@@ -222,12 +255,34 @@ class aeSecureMigrate
 			
 		} // if ($mysqli->query($sSQL)) 
 			
-		echo $sReturn;		
+		$this->mysqli->close();
+		return $sReturn;		
 		
-		$mysqli->close();
-		die();
+   } // function showTable()
+   
+   public function getProduct($RD_Subs_ID) 
+   {
+		$sReturn='unknown';
 		
-   } // function showTable()   
+		if ($this->mysqli===null)
+		{
+			echo '<p class="text-warning error">Please put this script in the same folder of your Joomla\'s <em>configuration.php</em> file i.e. in the root folder of your website.</p>';
+			die();
+		} 
+		
+		$sSQL = 'SELECT name as product FROM '.$this->JConfig->dbprefix.'rd_subs_products WHERE ID='.(int)$RD_Subs_ID.';';
+
+		if ($result = $this->mysqli->query($sSQL)) 
+		{	
+	
+			$arr=$result->fetch_array(MYSQLI_ASSOC);
+			$sReturn=isset($arr['product']) ? $arr['product'] : 'unknown';
+		}
+		
+		$this->mysqli->close();
+		return $sReturn;	
+		
+   } // function getProduct()
    
 } // class aeSecureMigrate
 
@@ -248,11 +303,54 @@ $task=aeSecureFct::getParam('task', 'string', '', false);
 $CB_Subs_ID=abs(aeSecureFct::getParam('cbSubs', 'int', 0, false));
 $RD_Subs_ID=abs(aeSecureFct::getParam('rdSubs', 'int', 0, false));
 
-if (($CB_Subs_ID>0) && ($task==='getList')) {
+$aeSMigrate=new aeSecureMigrate();
+
+switch ($task) 
+{
+	case 'getList':
 	
-	aeSecureMigrate::showTable($CB_Subs_ID);
+		if ($CB_Subs_ID>0) 
+		{
+			echo $aeSMigrate->showTable($CB_Subs_ID);
+			die();
+		} else {
+			die('cbSubs parameter is missing');
+		}
 	
-}
+		break;
+		
+	case 'getProduct':
+	
+		if ($RD_Subs_ID>0) 
+		{			
+			echo $aeSMigrate->getProduct($RD_Subs_ID);
+			die();
+		} else {
+			die('rdSubs parameter is missing');
+		}
+		
+		break;
+		
+	case 'doIt':
+	
+		if (($CB_Subs_ID>0) && ($RD_Subs_ID>0))
+		{			
+			echo $aeSMigrate->getProduct($RD_Subs_ID);
+			die();
+		} else {
+			die('cbSubs and rdSubs parameters are missing');
+		}
+		
+		break;
+		
+	case 'killMe':
+		echo '<p class="text-success">The file '.__FILE__.' has been removed from your server</p>';
+//unlink(__FILE__);
+		die();
+		
+} // case
+
+unset($aeSMigrate);
 
 ?> 
 		
@@ -303,7 +401,12 @@ if (($CB_Subs_ID>0) && ($task==='getList')) {
 		
             <div class="page-header"><h1>aeSecure - From CB Subscriptions to RD-Subs</h1></div>
 
-			<p class="text-info">Please first type your CB Subs plan ID to migrate to RD-Subs then press the <strong>Show customers</strong> button.</p>
+			<ul class="fa-ul">
+				<li><i class="fa-li fa fa-check"></i>1. Type your CB Subs plan ID to migrate to RD-Subs then press the <strong>1. Show customers</strong> button. Verify if it's correct.</li>
+				<li><i class="fa-li fa fa-check"></i>2. Type your RD-Subs product ID and click on the small <strong>Shopping cart</strong> button. If your product name is the good one, press the <strong>2. Migrate to RD-Subs</strong> button.</li>
+				<li><i class="fa-li fa fa-check"></i>3. Repeat for each plans to migrate and press the <strong>3. Remove this script </strong> button when finished.</li>
+			</ul>
+			<hr/>
          
             <form id="form" class="form-inline">  
 					
@@ -311,13 +414,15 @@ if (($CB_Subs_ID>0) && ($task==='getList')) {
 					<label for="cbSubs">CB Subs plan ID</label>&nbsp;
 					<input id="cbSubs" value="8" size="5" width="5" class="form-control" placeholder="CBSubs plan ID">&nbsp;&nbsp;&nbsp;
 					<label for="rbSubs">RD-Subs product ID</label>&nbsp;
-					<input disabled="disabled" id="rdSubs" class="form-control" placeholder="RD-Subs plan ID">
+					<input disabled="disabled"  size="5" width="5" id="rdSubs" class="form-control" placeholder="RD-Subs plan ID">
+					<button disabled="disabled" type="button" id="btnGetProduct" class="btn btn-default"><i class="fa fa-shopping-cart" aria-hidden="true"></i></button>&nbsp;
+					<strong><span id="ProductName">&nbsp;</span></strong>
 				</div>
 				<hr/>
                 <div class="row"> 
                     <button type="button" id="btnGetList" class="btn btn-primary"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;1. Show customers</button>
                     <button type="button" disabled="disabled" id="btnDoIt" class="btn btn-success"><i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;2. Migrate to RD-Subs</button>
-                    <button type="button" id="btnKillMe" class="btn btn-danger pull-right" style="margin-left:10px;"><i class="fa fa-eraser" aria-hidden="true"></i>&nbsp;Remove this script</button>
+                    <button type="button" id="btnKillMe" class="btn btn-danger pull-right" style="margin-left:10px;"><i class="fa fa-eraser" aria-hidden="true"></i>&nbsp;3. Remove this script</button>
                 </div>     
             </form>
 
@@ -331,141 +436,167 @@ if (($CB_Subs_ID>0) && ($task==='getList')) {
         <script type="text/javascript">
          
         $(document).ready(function() {
-
-        }); // $( document ).ready()
+			$('#cbSubs').select();
+        }); // $( document).ready()
         
+		/*
+		 * Retrieve the list of customers, current subscriptions in CB Subs
+		 */
         $('#btnGetList').click(function(e)  { 
             
-            var $data = new Object;
-            $data.task = "getList";
+			e.stopImmediatePropagation(); 
+
+			var $data = new Object;
+			$data.task = "getList";
 			$data.cbSubs = $('#cbSubs').val();
 
-            $.ajax({
-               beforeSend: function() {
-                  $('#Result').html('<div><span class="ajax_loading">&nbsp;</span><span style="font-style:italic;font-size:1.5em;">Please wait...</span></div>');
-               },// beforeSend()
-               async:true,
-               type:"GET",
-               url: "<?php echo basename(__FILE__); ?>",
-               data:$data,
-               datatype:"html",
-               success: function (data) { 
-                  $('#Result').html(data);    
-                  $('#rdSubs').prop("disabled", false);
-                  $('#btnDoIt').prop("disabled", false).removeClass("hidden");  				  
-                  initTableSort();
-               }
-            }); // $.ajax() 
-            e.stopImmediatePropagation(); 
+			$.ajax({
+				beforeSend: function() 
+				{
+					$('#Result').html('<div><span class="ajax_loading">&nbsp;</span><span style="font-style:italic;font-size:1.5em;">Please wait...</span></div>');
+				},// beforeSend()
+				async:true,
+				type:"POST",
+				url: "<?php echo basename(__FILE__); ?>",
+				data:$data,
+				datatype:"html",
+				success: function (data) 
+				{ 
+					$('#Result').html(data);    
+					$('#rdSubs').prop("disabled", false).select();
+					$('#btnGetProduct').prop("disabled", false);				  
+					initTableSort();
+				}
+			}); // $.ajax() 
 
-		});
+		}); // $('#btnGetList').click()
         
-         $('#btnKillSelected').click(function(e)  { 
-         
-            e.stopImmediatePropagation(); 
+		/*
+		 * Make the list of customers sortable
+		 */
+        function initTableSort() 
+		{
+
+			$("#tbl").tablesorter(
+			{
+				theme: "ice",
+				widthFixed: false,
+				sortMultiSortKey: "shiftKey",
+				sortResetKey: "ctrlKey",
+				headers: 
+				{
+					0: {sorter: "digit"}, // Table name
+					1: {sorter: "text"}, // Table name
+					2: {sorter: "digit"},  // Table name
+					3: {sorter: "text"}, // Table name
+					4: {sorter: "date"}, // Table name
+					5: {sorter: "date"}, // Table name
+					6: {sorter: "digit"}   // Number of records
+				},
+				ignoreCase: true,
+				headerTemplate: "{content} {icon}",
+				widgets: ["uitheme", "filter"],
+				initWidgets: true,
+				widgetOptions: {
+					uitheme: "ice",
+					filter_columnFilters: false
+				},               
+				sortList: [[0]]  // Sort by default on the table name
+			});
+
+
+         } // function initTableSort()
             
-            var $data = new Object;
-            $data.task = "KillSelected";
-            $data.doit= "0";
-            $data.pattern = window.btoa(encodeURIComponent($('#search').val()));
-            
-            $.ajax({
-                
-               beforeSend: function() {
-                  $('#Result').html('<div><span class="ajax_loading">&nbsp;</span><span style="font-style:italic;font-size:1.5em;">Please wait...</span></div>');
-                  $('#btnKillSelected').prop("disabled", true);  
-                  $('#btnKillMe').prop("disabled", true);    
-                  $('#search').prop("disabled", true);        
-               },// beforeSend()               
-               async:true,
-               type:"GET",
-               url: "<?php echo basename(__FILE__); ?>",
-               data:$data,
-               datatype:"html",
-               success: function (data) { 
-               
-                  $('#btnKillSelected').prop("disabled", false);
-                  $('#btnKillMe').prop("disabled", false);     
-                  $('#search').prop("disabled", false);    
-                  
-                  $('#btnDoIt').prop("disabled", false).toggleClass('hidden');
-                  
-                  $('#Result').html(data);    
-                  
-               }, // success
-               error: function(Request, textStatus, errorThrown) {
-                  $('#btnKillSelected').prop("disabled", false);
-                  $('#btnKillMe').prop("disabled", false);
-                  // Display an error message to inform the user about the problem
-                  var $msg = '<div class="bg-danger text-danger img-rounded" style="margin-top:25px;padding:10px;">';
-                  $msg = $msg + '<strong>An error has occured :</strong><br/>';
-                  $msg = $msg + 'Internal status: '+textStatus+'<br/>';
-                  $msg = $msg + 'HTTP Status: '+Request.status+' ('+Request.statusText+')<br/>';
-                  $msg = $msg + 'XHR ReadyState: ' + Request.readyState + '<br/>';
-                  $msg = $msg + 'Raw server response:<br/>'+Request.responseText+'<br/>';
-                  $url='<?php echo basename(__FILE__); ?>?'+$data.toString();
-                  $msg = $msg + 'URL that has returned the error : <a target="_blank" href="'+$url+'">'+$url+'</a><br/><br/>';
-                  $msg = $msg + '</div>';
-                  $('#Result').html($msg);
-               } // error                 
-            }); // $.ajax()
-         }); 
-         
-         $('#btnDoIt').click(function(e)  { 
-         
-            e.stopImmediatePropagation(); 
-            
-            var $data = new Object;
-            $data.task = "KillSelected";
-            $data.doit= "1";
-            $data.pattern = window.btoa(encodeURIComponent($('#search').val()));
-            
-            $.ajax({
-                
-               beforeSend: function() {
-                  $('#Result').html('<div><span class="ajax_loading">&nbsp;</span><span style="font-style:italic;font-size:1.5em;">Please wait...</span></div>');
-                  $('#btnKillSelected').prop("disabled", true);  
-                  $('#btnKillMe').prop("disabled", true);    
-                  $('#btnDoIt').prop("disabled", true);
-                  $('#search').prop("disabled", true);        
-               },// beforeSend()               
-               async:true,
-               type:"GET",
-               url: "<?php echo basename(__FILE__); ?>",
-               data:$data,
-               datatype:"html",
-               success: function (data) { 
-               
-                  $('#btnKillSelected').prop("disabled", true).addClass('hidden');
-                  $('#btnDoIt').prop("disabled", true).toggleClass('hidden');
-                  
-                  $('#btnGetList').prop("disabled", false).removeClass('hidden');
-                  $('#btnKillMe').prop("disabled", false);
-                  
-                  $('#search').prop("disabled", false);    
-                  $('#search').val('');
-                  
-                  $('#Result').html(data);    
-                  
-               }, // success
-               error: function(Request, textStatus, errorThrown) {
-                  $('#btnKillSelected').prop("disabled", false);
-                  $('#btnDoIt').prop("disabled", false);
-                  // Display an error message to inform the user about the problem
-                  var $msg = '<div class="bg-danger text-danger img-rounded" style="margin-top:25px;padding:10px;">';
-                  $msg = $msg + '<strong>An error has occured :</strong><br/>';
-                  $msg = $msg + 'Internal status: '+textStatus+'<br/>';
-                  $msg = $msg + 'HTTP Status: '+Request.status+' ('+Request.statusText+')<br/>';
-                  $msg = $msg + 'XHR ReadyState: ' + Request.readyState + '<br/>';
-                  $msg = $msg + 'Raw server response:<br/>'+Request.responseText+'<br/>';
-                  $url='<?php echo basename(__FILE__); ?>?'+$data.toString();
-                  $msg = $msg + 'URL that has returned the error : <a target="_blank" href="'+$url+'">'+$url+'</a><br/><br/>';
-                  $msg = $msg + '</div>';
-                  $('#Result').html($msg);
-               } // error                 
-            }); // $.ajax()
-         }); 
-         
+		/*
+		 * Retrieve the name of the RD-Subs product
+		 */
+        $('#btnGetProduct').click(function (e)
+		{
+			
+			e.stopImmediatePropagation(); 
+
+			var $data = new Object;
+			$data.task = "getProduct";
+			$data.rdSubs = $('#rdSubs').val();
+
+			$.ajax(
+			{
+				async:true,
+				type:"POST",
+				url: "<?php echo basename(__FILE__); ?>",
+				data:$data,
+				datatype:"html",
+				success: function (data) { 
+					$('#ProductName').html(data);
+					if(data!=='unknown') 
+					{
+						$('#btnDoIt').prop("disabled", false).removeClass("hidden");  
+					} else {
+						$('#btnDoIt').prop("disabled", true).addClass("hidden");  
+					}
+				}
+			}); // $.ajax() 			
+        }); // $('#btnGetProduct').click()   
+
+		/*
+		 * Do it, migrate
+		 */			
+		$('#btnDoIt').click(function(e)  { 
+
+			e.stopImmediatePropagation(); 
+
+			var $data = new Object;
+			$data.task = "DoIt";
+			$data.cbSubs = $('#cbSubs').val();
+			$data.rdSubs = $('#rdSubs').val();
+
+			$.ajax({
+
+				beforeSend: function() {
+					$('#Result').html('<div><span class="ajax_loading">&nbsp;</span><span style="font-style:italic;font-size:1.5em;">Please wait...</span></div>');
+					$('#btnKillMe').prop("disabled", true); 
+					$('#btnGetList').prop("disabled", true);  
+					$('#btnGetProduct').prop("disabled", true);    
+					$('#btnDoIt').prop("disabled", true);
+					$('#cbSubs').prop("disabled", true);        
+					$('#rdSubs').prop("disabled", true);       
+				},// beforeSend()               
+				async:true,
+				type:"GET",
+				url: "<?php echo basename(__FILE__); ?>",
+				data:$data,
+				datatype:"html",
+				success: function (data) { 
+
+					$('#btnGetList').prop("disabled", false);  
+					$('#btnGetProduct').prop("disabled", false);    
+					$('#btnKillMe').prop("disabled", false); 
+					$('#btnDoIt').prop("disabled", false);
+					$('#cbSubs').prop("disabled", false);        
+					$('#rdSubs').prop("disabled", false);       
+
+					$('#Result').html(data);    
+
+				}, // success
+				error: function(Request, textStatus, errorThrown) 
+				{
+					$('#btnKillMe').prop("disabled", false); 
+					$('#btnDoIt').prop("disabled", false);
+					// Display an error message to inform the user about the problem
+					var $msg = '<div class="bg-danger text-danger img-rounded" style="margin-top:25px;padding:10px;">';
+					$msg = $msg + '<strong>An error has occured :</strong><br/>';
+					$msg = $msg + 'Internal status: '+textStatus+'<br/>';
+					$msg = $msg + 'HTTP Status: '+Request.status+' ('+Request.statusText+')<br/>';
+					$msg = $msg + 'XHR ReadyState: ' + Request.readyState + '<br/>';
+					$msg = $msg + 'Raw server response:<br/>'+Request.responseText+'<br/>';
+					$url='<?php echo basename(__FILE__); ?>?'+$data.toString();
+					$msg = $msg + 'URL that has returned the error : <a target="_blank" href="'+$url+'">'+$url+'</a><br/><br/>';
+					$msg = $msg + '</div>';
+					$('#Result').html($msg);
+				} // error                 
+			}); // $.ajax()
+		}); // $('#btnDoIt').click()
+		 
         // Remove this script
         $('#btnKillMe').click(function(e)  { 
            e.stopImmediatePropagation(); 
@@ -490,37 +621,6 @@ if (($CB_Subs_ID>0) && ($task==='getList')) {
               }
            }); // $.ajax()
         }); // $('#KillMe').click()   
-      
-        function initTableSort() {
-
-           $("#tbl").tablesorter({
-               theme: "ice",
-               widthFixed: false,
-               sortMultiSortKey: "shiftKey",
-               sortResetKey: "ctrlKey",
-               headers: {
-                  0: {sorter: "digit"}, // Table name
-                  1: {sorter: "text"}, // Table name
-                  2: {sorter: "digit"},  // Table name
-                  3: {sorter: "text"}, // Table name
-                  4: {sorter: "date"}, // Table name
-                  5: {sorter: "date"}, // Table name
-                  6: {sorter: "digit"}   // Number of records
-               },
-               ignoreCase: true,
-               headerTemplate: "{content} {icon}",
-               widgets: ["uitheme", "filter"],
-               initWidgets: true,
-               widgetOptions: {
-                  uitheme: "ice",
-                  filter_columnFilters: false
-               },               
-               sortList: [[0]]  // Sort by default on the table name
-            });
-
-
-         } // function initTableSort()
-            
       </script>
       
    </body>
