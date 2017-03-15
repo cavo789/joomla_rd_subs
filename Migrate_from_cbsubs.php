@@ -1,12 +1,20 @@
 <?php
 
 /**
- * Author : AVONTURE Christophe - https://www.aesecure.com
+ * Author : AVONTURE Christophe - https://www.aesecure.com | Website Firewall Application and unhacking services
  *
- * Small script for helping the migration from CB Subs to RD-Subs
+ * Small script for helping the migration from CB Subs (https://www.joomlapolis.com/) to RD-Subs (https://rd-media.org/)
+ *
+ * Please be sure to have a backup of your database before using this script.
+ *
+ * The latest version of the script can be freely retrieved on https://github.com/cavo789/rd-subs
+ *
+ * No support is provided by the developer, use this script under your own responsabilities
+ * 
+ * License : MIT
  */
  
-define('DEBUG', true);
+define('DEBUG', false);
 
 if (!defined('DS')) {
     define('DS', DIRECTORY_SEPARATOR);
@@ -840,8 +848,10 @@ switch ($task)
 		break;
 		
 	case 'killMe':
+	
 		echo '<p class="text-success">The file '.__FILE__.' has been removed from your server</p>';
-//unlink(__FILE__);
+		unlink(__FILE__);
+		
 		die();
 		
 } // case
