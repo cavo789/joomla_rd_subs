@@ -10,10 +10,10 @@
  * The latest version of the script can be freely retrieved on https://github.com/cavo789/rd-subs
  *
  * No support is provided by the developer, use this script under your own responsabilities
- * 
+ *
  * License : MIT
  */
- 
+
 define('DEBUG', false);
 
 if (!defined('DS')) {
@@ -22,7 +22,7 @@ if (!defined('DS')) {
 
 class aeSecureFct
 {
-    
+
    /**
     * Safely read posted variables
     *
@@ -33,739 +33,647 @@ class aeSecureFct
     */
     public static function getParam($name, $type = 'string', $default = '', $base64 = false)
     {
-      
-        $tmp='';
-        $return=$default;
-      
+        $tmp = '';
+        $return = $default;
+
         if (isset($_POST[$name])) {
             if (in_array($type, array('int','integer'))) {
-                $return=filter_input(INPUT_POST, $name, FILTER_SANITIZE_NUMBER_INT);
-            } elseif ($type=='boolean') {
+                $return = filter_input(INPUT_POST, $name, FILTER_SANITIZE_NUMBER_INT);
+            } elseif ($type == 'boolean') {
                 // false = 5 characters
-                $tmp=substr(filter_input(INPUT_POST, $name, FILTER_SANITIZE_STRING), 0, 5);
-                $return=(in_array(strtolower($tmp), array('1','on','true')))?true:false;
-            } elseif ($type=='string') {
-                $return=filter_input(INPUT_POST, $name, FILTER_SANITIZE_STRING);
-                if ($base64===true) {
-                    $return=base64_decode($return);
+                $tmp = substr(filter_input(INPUT_POST, $name, FILTER_SANITIZE_STRING), 0, 5);
+                $return = (in_array(strtolower($tmp), array('1','on','true')))?true:false;
+            } elseif ($type == 'string') {
+                $return = filter_input(INPUT_POST, $name, FILTER_SANITIZE_STRING);
+                if ($base64 === true) {
+                    $return = base64_decode($return);
                 }
-            } elseif ($type=='unsafe') {
-                $return=$_POST[$name];
+            } elseif ($type == 'unsafe') {
+                $return = $_POST[$name];
             }
         } else { // if (isset($_POST[$name]))
-     
+
             if (isset($_GET[$name])) {
                 if (in_array($type, array('int','integer'))) {
-                    $return=filter_input(INPUT_GET, $name, FILTER_SANITIZE_NUMBER_INT);
-                } elseif ($type=='boolean') {
+                    $return = filter_input(INPUT_GET, $name, FILTER_SANITIZE_NUMBER_INT);
+                } elseif ($type == 'boolean') {
                     // false = 5 characters
-                    $tmp=substr(filter_input(INPUT_GET, $name, FILTER_SANITIZE_STRING), 0, 5);
-                    $return=(in_array(strtolower($tmp), array('1','on','true')))?true:false;
-                } elseif ($type=='string') {
-                    $return=filter_input(INPUT_GET, $name, FILTER_SANITIZE_STRING);
-                    if ($base64===true) {
-                        $return=base64_decode($return);
+                    $tmp = substr(filter_input(INPUT_GET, $name, FILTER_SANITIZE_STRING), 0, 5);
+                    $return = (in_array(strtolower($tmp), array('1','on','true')))?true:false;
+                } elseif ($type == 'string') {
+                    $return = filter_input(INPUT_GET, $name, FILTER_SANITIZE_STRING);
+                    if ($base64 === true) {
+                        $return = base64_decode($return);
                     }
-                } elseif ($type=='unsafe') {
-                    $return=$_GET[$name];
+                } elseif ($type == 'unsafe') {
+                    $return = $_GET[$name];
                 }
             } // if (isset($_GET[$name]))
         } // if (isset($_POST[$name]))
-      
+
         return $return;
     } // function getParam()
 
 
-	// @link : http://ca2.php.net/manual/fr/function.mysql-fetch-assoc.php#74048
-	public static function array2table($arr,$width)
-	{
-		$sReturn='';
-		$count = count($arr);
-		
-		if($count > 0)
-		{
-			
-			reset($arr);
-			
-			$num = count(current($arr));
-			
-			$sReturn.="<table id=\"tbl\" class=\"table tablesorter table-hover table-bordered table-striped\" width=\"$width\">\n";
-			
-			// Add an ID column ... only if the recordset don't have one.
-			$sReturn.="<thead>".(!isset($arr[0]['id'])?"<td>ID</td>":"")."\n";
-			
-			foreach(current($arr) as $key => $value)
-			{
-			   $sReturn.="<td>".$key."&nbsp;</td>\n";   
-			}   
-			
-			$sReturn.="</thead><tfoot></tfoot><tbody>\n";
-			
-			$i=0;
-			
-			while ($curr_row = current($arr)) {
-				
-				$i+=1;
-				$sReturn.="<tr>\n".(!isset($arr[0]['id'])?"<td>$i</td>":"");
-				$col = 1;
-				
-				while (false !== ($curr_field = current($curr_row))) 
-				{
-				   $sReturn.="<td>".utf8_encode($curr_field)."&nbsp;</td>\n";
-				   next($curr_row);
-				   $col++;
-				}
-				
-				while($col <= $num){
-				   $sReturn.="<td>&nbsp;</td>\n";
-				   $col++;       
-				}
-				
-				$sReturn.="</tr>\n";
-				
-				next($arr);
-				
-			}
-			
-			$sReturn.="</tbody></table>\n";
-			
-		}
-		   
-		return $sReturn;
-	}
-   
+    // @link : http://ca2.php.net/manual/fr/function.mysql-fetch-assoc.php#74048
+    public static function array2table($arr, $width)
+    {
+        $sReturn = '';
+        $count = count($arr);
+
+        if ($count > 0) {
+            reset($arr);
+
+            $num = count(current($arr));
+
+            $sReturn .= "<table id=\"tbl\" class=\"table tablesorter table-hover table-bordered table-striped\" width=\"$width\">\n";
+
+            // Add an ID column ... only if the recordset don't have one.
+            $sReturn .= "<thead>".(!isset($arr[0]['id'])?"<td>ID</td>":"")."\n";
+
+            foreach (current($arr) as $key => $value) {
+                $sReturn .= "<td>".$key."&nbsp;</td>\n";
+            }
+
+            $sReturn .= "</thead><tfoot></tfoot><tbody>\n";
+
+            $i = 0;
+
+            while ($curr_row = current($arr)) {
+                $i += 1;
+                $sReturn .= "<tr>\n".(!isset($arr[0]['id'])?"<td>$i</td>":"");
+                $col = 1;
+
+                while (false !== ($curr_field = current($curr_row))) {
+                    $sReturn .= "<td>".utf8_encode($curr_field)."&nbsp;</td>\n";
+                    next($curr_row);
+                    $col++;
+                }
+
+                while ($col <= $num) {
+                    $sReturn .= "<td>&nbsp;</td>\n";
+                    $col++;
+                }
+
+                $sReturn .= "</tr>\n";
+
+                next($arr);
+            }
+
+            $sReturn .= "</tbody></table>\n";
+        }
+
+        return $sReturn;
+    }
 } // class aeSecureFct
 
 class aeSecureMigrate
 {
-	private $DebugUser_ID='2189'; 
-	// 55 = Christophe GUERTON
-	// 76 = Frédéric JOUAN
-	// 1210 = Robert GASTAUD - Pro
-	// 2316 = Gérard COLLETTA - Premium
-	// 2327 = MG Eco - Premium+
-	// 2332 = Fabrice PRIEUR - Pro
-	
-	// 2189 = Eric Merkes - Cleaning + Premium
-	
-    private $mysqli=null;
-	private $JConfig=null;
-    private $sFolder='';
-      
+    private $DebugUser_ID = '9999';
+
+    private $mysqli = null;
+    private $JConfig = null;
+    private $sFolder = '';
+
    /**
     * Class constructor : initialize a few private variables
     *
     * @return boolean
     */
-    function __construct()
+    public function __construct()
     {
-        
-		if (isset($_SERVER['SCRIPT_FILENAME'])) {
-			// In case of this script isn't in the current folder but is a symbolic link.
-			// The folder should be the current folder and not the folder where the script is stored
-			$this->sFolder=str_replace('/', DS, dirname($_SERVER['SCRIPT_FILENAME'])).DS;
-		} else {
-			$this->sFolder=__DIR__;
-		}
-		
-		if (file_exists($sFileName=$this->sFolder.'configuration.php'))
-		{
-			
-			require_once($sFileName);
-			$this->JConfig = new JConfig();
-			
-			if (DEBUG===true) 
-			{
-				mysqli_report(MYSQLI_REPORT_STRICT);
-			}
-			
-			$this->mysqli = new mysqli($this->JConfig->host, $this->JConfig->user, $this->JConfig->password);
-			
-			// Don't block if somes dates are 0000-00-00 00:00:00 but allow the code to handle these dates.
-			$this->mysqli->query("SET sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';");
-			
-			if (mysqli_connect_errno()!==0) {
-				
-				echo '<p class="bg-danger error">Could not connect to mysql.</p>';
-				$this->mysqli->close();
-				$this->mysqli=null;
-			
-			} else { // if (mysqli_connect_errno()!==0)
-				
-				// Be sure to work on the correct database
-				mysqli_select_db($this->mysqli, $this->JConfig->db);
-				
-			} // if (mysqli_connect_errno()!==0)
-				
-		} // if (file_exists($sFileName=$this->sFolder.'configuration.php'))
-			
-        return true;
-		
-    } // function __construct()
-	
-	/**
-	 * Release
-	 */
-    function __destructor()
-	{
-		
-		unset($this->JConfig);
-		$this->mysqli->close();
-		unset($this->mysqli);
-		
-		return true;
-		
-	}
-	
-	/**
-	 * Shwo debugging info
-	 */
-	public function debug()
-	{
-		
-		if ($this->mysqli===null)
-		{
-			echo '<p class="text-warning error">Please put this script in the same folder of your Joomla\'s <em>configuration.php</em> file i.e. in the root folder of your website.</p>';
-			die();
-		} 
-				
-		$sReturn='';
-			
-		// Check the presence of CBSubs
-		
-		$sSQL="SELECT * FROM INFORMATION_SCHEMA.TABLES ".
-			"WHERE (TABLE_SCHEMA LIKE '".$this->JConfig->db."') AND ".
-			"(TABLE_NAME='".$this->JConfig->dbprefix."cbsubs_subscriptions')";
-
-        if ($this->mysqli->query($sSQL)) 
-        {
-			
-			$arrQueries=array(
-				array("SELECT * ".
-				   "FROM `".$this->JConfig->dbprefix."cbsubs_subscriptions` CBSubs ".
-				   "WHERE CBSubs.user_id = ".$this->DebugUser_ID.";","cbsubs_subscriptions"),
-				//array("SELECT * FROM `".$this->JConfig->dbprefix."comprofiler` WHERE user_id=".$this->DebugUser_ID.";","comprofiler"),			   
-				//array("SELECT * FROM `".$this->JConfig->dbprefix."rd_subs_users` WHERE userid=".$this->DebugUser_ID.";","rd_subs_users"),
-				array("SELECT Items.* ".
-				   "FROM `".$this->JConfig->dbprefix."cbsubs_payment_items` Items ".
-				   (DEBUG?"INNER JOIN `".$this->JConfig->dbprefix."cbsubs_payment_baskets` Baskets ON (Baskets.id=Items.payment_basket_id) AND (Baskets.user_id='".$this->DebugUser_ID."') ":"").
-				   //"INNER JOIN `".$this->JConfig->dbprefix."cbsubs_subscriptions` CBSubs ON CBSubs.id=Items.subscription_id ".
-				   //"WHERE (CBSubs.user_id = ".$this->DebugUser_ID.") ".
-				   //"AND (Items.item_type='usersubscription') ".  // Force and only return usersubscription.  Use "merchandise" for products
-				   "ORDER BY Items.id;","cbsubs_payment_items"),
-				array("SELECT Baskets.* ".
-				   "FROM `".$this->JConfig->dbprefix."cbsubs_payment_baskets` Baskets ".
-				   "INNER JOIN `".$this->JConfig->dbprefix."cbsubs_payment_items` Items ON Items.payment_basket_id=Baskets.id ".
-				   "WHERE (Baskets.user_id = ".$this->DebugUser_ID.") ".
-				   "ORDER BY Baskets.id;","cbsubs_payment_baskets"),
-				array("SELECT * FROM `".$this->JConfig->dbprefix."rd_subs_orders` ORDER BY date","rd_subs_orders"),
-				array("SELECT * FROM `".$this->JConfig->dbprefix."rd_subs_transactions` ORDER BY date","rd_subs_transactions"),
-				array("SELECT * FROM `".$this->JConfig->dbprefix."rd_subs_product2user` ORDER BY valid_to","rd_subs_product2user")
-			);
-
-			foreach ($arrQueries as $query) 
-			{
-				if ($results = $this->mysqli->query($query[0])) 
-				{
-					
-					// For display purpose
-					$arr=array();
-					while ($row = mysqli_fetch_assoc($results)) {
-						$arr[] = $row; 
-					}
-					
-					$sReturn.='<hr/><h3>'.$query[1].'</h3>';
-					
-					if(count($arr)>0) 
-					{
-						
-						$sReturn.=aeSecureFct::array2table($arr,1200);	
-						
-					} else {
-						
-						$sReturn.='<p class="bg-danger error">No record</p>';
-					}
-					
-				} else {
-					
-					$sReturn.='<p class="bg-danger error">Error in SQL:<br/>'.$query[0].'</p>';
-					
-				}
-			}
-            
+        if (isset($_SERVER['SCRIPT_FILENAME'])) {
+            // In case of this script isn't in the current folder but is a symbolic link.
+            // The folder should be the current folder and not the folder where the script is stored
+            $this->sFolder = str_replace('/', DS, dirname($_SERVER['SCRIPT_FILENAME'])).DS;
         } else {
-			
-			$sReturn.='<p class="bg-danger error">CBSubs not found (table #_cbsubs_subscriptions not found).</p>';
-			
-		} // if ($mysqli->query($sSQL)) 
-			
-		$this->mysqli->close();
-		return $sReturn;		
-		
-   } // function debug()   
-   
+            $this->sFolder = __DIR__;
+        }
+
+        if (file_exists($sFileName = $this->sFolder.'configuration.php')) {
+            require_once($sFileName);
+            $this->JConfig = new JConfig();
+
+            if (DEBUG === true) {
+                mysqli_report(MYSQLI_REPORT_STRICT);
+            }
+
+            $this->mysqli = new mysqli($this->JConfig->host, $this->JConfig->user, $this->JConfig->password);
+
+            // Don't block if somes dates are 0000-00-00 00:00:00 but allow the code to handle these dates.
+            $this->mysqli->query("SET sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';");
+
+            if (mysqli_connect_errno() !== 0) {
+                echo '<p class="bg-danger error">Could not connect to mysql.</p>';
+                $this->mysqli->close();
+                $this->mysqli = null;
+            } else { // if (mysqli_connect_errno()!==0)
+
+                // Be sure to work on the correct database
+                mysqli_select_db($this->mysqli, $this->JConfig->db);
+            } // if (mysqli_connect_errno()!==0)
+        } // if (file_exists($sFileName=$this->sFolder.'configuration.php'))
+
+        return true;
+    } // function __construct()
+
     /**
-	 * Retrieve a recordset from the database and display it as a nice HTML table
-	 */
-	public function showTable($CB_Subs_ID)
-	{
-	    
-		if ($this->mysqli===null)
-		{
-			echo '<p class="text-warning error">Please put this script in the same folder of your Joomla\'s <em>configuration.php</em> file i.e. in the root folder of your website.</p>';
-			die();
-		} 
-				
-		$sReturn='';
-				
-		// Check the presence of CBSubs
-		
-		$sSQL="SELECT * FROM INFORMATION_SCHEMA.TABLES ".
-			"WHERE (TABLE_SCHEMA LIKE '".$this->JConfig->db."') AND ".
-			"(TABLE_NAME='".$this->JConfig->dbprefix."cbsubs_subscriptions')";
-
-        if ($this->mysqli->query($sSQL)) 
-        {
-			
-			$sSQL = "SELECT P.name AS product, user_id, U.name AS username, CAST(subscription_date AS date) AS created, ".
-			   "CAST(expiry_date AS date) AS valid_to, " .
-			   "CASE WHEN (expiry_date < Now()) THEN 0 ELSE 1 END AS status ".
-               "FROM `".$this->JConfig->dbprefix."cbsubs_subscriptions` CB ".
-			   "INNER JOIN `".$this->JConfig->dbprefix."cbsubs_plans` P ON CB.plan_id = P.id ".
-			   "INNER JOIN `".$this->JConfig->dbprefix."users` U ON CB.user_id = U.id ".
-               "WHERE CB.plan_id = ".$CB_Subs_ID.";";
-			
-			if ($results = $this->mysqli->query($sSQL)) 
-			{
-				
-				// For display purpose
-				$arr=array();
-				while ($row = mysqli_fetch_assoc($results)) {
-					$arr[] = $row; 
-				}
-				
-				if(count($arr)>0) 
-				{
-					
-					$sReturn.=aeSecureFct::array2table($arr,1200);	
-					
-				} else { // if(count($arr)>0) 
-					
-					// Check if the plan is a merchandise and not a subscription (i.e. no entries in cbsubs_subscriptions but well in 
-					// cbsubs_payment_items)
-					
-					$sSQL = 'select Baskets.user_id, Items.* '.
-						'from `'.$this->JConfig->dbprefix.'cbsubs_payment_items` Items '.
-							'inner join `'.$this->JConfig->dbprefix.'cbsubs_payment_baskets` Baskets on Items.payment_basket_id = Baskets.id '.
-						'where plan_id = '.$CB_Subs_ID.';';
-
-					if ($results = $this->mysqli->query($sSQL)) 
-					{
-						
-						// For display purpose
-						$arr=array();
-						while ($row = mysqli_fetch_assoc($results)) {
-							$arr[] = $row; 
-						}
-						$sReturn.=aeSecureFct::array2table($arr,1200);	
-						
-					} else {
-						
-					   $sReturn.='<p class="bg-danger error">--No subscriptions in CBSubs for plan '.$CB_Subs_ID.'.</p>';
-					   
-					}
-						
-				} // if(count($arr)>0) 
-				
-		    } else { // if ($results = $this->mysqli->query($sSQL)) 
-				
-				$sReturn.='<p class="bg-danger error">**No subscriptions in CBSubs for plan '.$CB_Subs_ID.'.</p>';
-				
-			} // if ($results = $this->mysqli->query($sSQL)) 
-            
-        } else { // if ($this->mysqli->query($sSQL)) 
-			
-			$sReturn.='<p class="bg-danger error">CBSubs not found (table #_cbsubs_subscriptions not found).</p>';
-			
-		} // if ($this->mysqli->query($sSQL)) 
-			
-		$this->mysqli->close();
-		return $sReturn;		
-		
-   } // function showTable()
-   
-    /**
-	 * Return the name of the CBSubs plan
-	 */
-	public function getPlan($CB_Subs_ID) 
-	{
-		$sReturn='unknown';
-
-		if ($this->mysqli===null)
-		{
-			echo '<p class="text-warning error">Please put this script in the same folder of your Joomla\'s <em>configuration.php</em> file i.e. in the root folder of your website.</p>';
-			die();
-		} 
-
-		$sSQL = 'SELECT name as plan FROM '.$this->JConfig->dbprefix.'cbsubs_plans WHERE ID='.(int)$CB_Subs_ID.';';
-
-		if ($result = $this->mysqli->query($sSQL)) 
-		{	
-
-			$arr=$result->fetch_array(MYSQLI_ASSOC);
-			$sReturn=isset($arr['plan']) ? $arr['plan'] : 'unknown';
-		}
-
-		$this->mysqli->close();
-		return $sReturn;	
-		
-	} // function getPlan()
-   
-    /**
-	 * Return the name of the RD-Subs product
-	 */
-	public function getProduct($RD_Subs_ID) 
-	{
-		$sReturn='unknown';
-
-		if ($this->mysqli===null)
-		{
-			echo '<p class="text-warning error">Please put this script in the same folder of your Joomla\'s <em>configuration.php</em> file i.e. in the root folder of your website.</p>';
-			die();
-		} 
-
-		$sSQL = 'SELECT name as product FROM '.$this->JConfig->dbprefix.'rd_subs_products WHERE ID='.(int)$RD_Subs_ID.';';
-
-		if ($result = $this->mysqli->query($sSQL)) 
-		{	
-
-			$arr=$result->fetch_array(MYSQLI_ASSOC);
-			$sReturn=isset($arr['product']) ? $arr['product'] : 'unknown';
-		}
-
-		$this->mysqli->close();
-		return $sReturn;	
-		
-	} // function getProduct()
-   
-    /**
-	 * Debuging - Empty RD concerned tables
-	 */
-	public function emptyTables() 
-	{
-		$arr=array('rd_subs_orders','rd_subs_product2user','rd_subs_transactions','rd_subs_users');
-		
-		foreach ($arr as $tbl) {
-			$rdTable=$this->JConfig->dbprefix.$tbl;
-			$this->resetTable($rdTable);
-		}
-		
-		return implode($arr,', ').' have been clean up';
-		
-	} // function emptyTables()
-	
-    /**
-	 * Run a DML query like INSERT INTO or TRUNCATE or UPDATE ...
-	 */
-	private function runSQL($sSQL, $text, $rdTable, $extra_where='', $orderby='') 
-	{	   
-
-		$sSQL = rtrim($sSQL, ' ;');
-		
-		if ($extra_where!=='')
-		{
-			if (stripos($sSQL, 'WHERE')!==FALSE) 
-			{
-				// Add an extra condition
-				$sSQL.=' AND '.$extra_where;
-			} else 
-			{	
-				// Add a condition
-				$sSQL.=' WHERE '.$extra_where;
-			}
-		} // if ($extra_where!=='')
-			
-		if($orderby!=='') $sSQL.=' '.$orderby;
-
-		if (DEBUG) 
-		{
-			echo '<code class="language-sql" language="sql">'.$sSQL.'</code>';
-		}
-		
-		if ($this->mysqli->query($sSQL) === TRUE) 
-		{
-			$sReturn='<li><i class="text-success fa-li fa fa-check"></i>'.$text.' migrated to '.$this->JConfig->dbprefix.$rdTable.'</li>';
-		} else 
-		{
-			$sReturn='<li><i class="text-danger fa-li fa fa-exclamation-triangle"></i>Error - '.$this->mysqli->error.'<br/>'.$sSQL.'</li>';
-		}		
-
-		return $sReturn;
-		
-   } // function runSQL()
-   
-	/**
-	* Reset : empty the table and reset the auto_increment to 1
-	*/
-	private function resetTable($rdTable) 
-	{
-	   
-		$this->mysqli->query('truncate table `'.$rdTable.'`;');
-		$this->mysqli->query('alter table `'.$rdTable.'` AUTO_INCREMENT = 1');
-		
-		return true;
-		
-	} // function resetTable()
-
-	/**
-	 * Helper. Implodes an array into a list of fields and a list of values.
-	 */
-    private function keyToSQL($arrKeys) 
+     * Release
+     */
+    public function __destructor()
     {
-	   	
-		$fields='';
-		$values='';
-		foreach ($arrKeys as $name=>$value) {
-			$fields.='`'.$name.'`, ';
-			$values.=($value==''?'""':$value).' as `'.$name.'`, ';
-		}
-		$fields=rtrim($fields,', ');
-		$values=rtrim($values,', ');
-		
-		return array($fields, $values);
-		
-	} // function keyToSQL()
-   
-	/**
-	 * Start the migration; get records from CBSubs and insert them into RD-Subs tables
-	 */
-	public function startMigration($CB_Subs_ID, $RD_Subs_ID) 
-	{		
-		$sReturn='';
-		
-		if ($this->mysqli===null)
-		{
-			echo '<p class="text-warning error">Please put this script in the same folder of your Joomla\'s <em>configuration.php</em> file i.e. in the root folder of your website.</p>';
-			die();
-		} 
-		
-		// Get if the plan is a usersubscription or a merchandise (a product; one-time fee)
-				
-		$sSQL = 'SELECT item_type FROM '.$this->JConfig->dbprefix.'cbsubs_plans WHERE ID='.(int)$CB_Subs_ID.';';
+        unset($this->JConfig);
+        $this->mysqli->close();
+        unset($this->mysqli);
 
-		if ($result = $this->mysqli->query($sSQL)) 
-		{	
-			$arr=$result->fetch_array(MYSQLI_ASSOC);
-			$sCBSubsItemType=isset($arr['item_type']) ? $arr['item_type'] : 'unknown';
-		}
-		
-		if ($sCBSubsItemType=='unknown') 
-		{
-			die('Invalid CBSubs item_type');
-		}	
-				
-		// -----------------------------------------------------------------
-		// 1. Migrate records of #__cbsubs_payment_items i.e. get transactions
-		// -----------------------------------------------------------------
-					
-		$rdTable=$this->JConfig->dbprefix.'rd_subs_transactions';
-	/*	
-		if($sCBSubsItemType!=='merchandise')
-		{
-			// It's a subscription (a "usersubscription")
-			
-			list($fields, $values) = $this->keyToSQL(array(
-				'transaction_id' => 'Items.payment_basket_id ',
-				'userid' => 'CBSubs.user_id',
-				'details' => 'Items.artnum',
-				'amount' => 'Items.rate',
-				'date' => 'Items.start_date',
-				'type' => 'Baskets.txn_type',
-				'email_paypal' => 'Baskets.payer_email',
-				'ordercode' => 'Baskets.id',                   // Link with cbsubs_payment_baskets.id
-				'plugin' => '"CBSubs"'                        // Specify CBSubs to make intuitive the origin of the record
-			));	
-						
-			$sSQL='insert into `'.$rdTable.'` ('.$fields.') select distinct '.$values.' '.
-				'from `'.$this->JConfig->dbprefix.'cbsubs_subscriptions` CBSubs '.
-					'inner join `'.$this->JConfig->dbprefix.'cbsubs_payment_items` Items on CBSubs.id = Items.subscription_id '.
-					'inner join `'.$this->JConfig->dbprefix.'cbsubs_payment_baskets` Baskets on Items.payment_basket_id = Baskets.id '.
-				'where (CBSubs.`plan_id` = '.(int)$CB_Subs_ID.') AND (Baskets.user_id=CBSubs.user_id) AND '.
-					// Use a NOT IN criteria to be sure to add this record only once even if the script is started several times
-					'(Items.payment_basket_id NOT IN (SELECT transaction_id FROM `'.$rdTable.'`));';
-		} else {
-			*/
-			// It's a product (a "merchandise")
-			
-			list($fields, $values) = $this->keyToSQL(array(
-				'transaction_id' => 'Items.payment_basket_id ',
-				'userid' => 'Baskets.user_id',
-				'details' => 'Items.artnum',
-				'amount' => 'Items.rate',
-				'date' => 'Items.start_date',
-				'type' => 'Baskets.txn_type',
-				'email_paypal' => 'Baskets.payer_email',
-				'ordercode' => 'Baskets.id',                   // Link with cbsubs_payment_baskets.id
-				'plugin' => '"CBSubs"'                        // Specify CBSubs to make intuitive the origin of the record
-			));	
-			
-			$sSQL='insert into `'.$rdTable.'` ('.$fields.') select distinct '.$values.' '.
-				'from `'.$this->JConfig->dbprefix.'cbsubs_payment_items` Items '.
-					'inner join `'.$this->JConfig->dbprefix.'cbsubs_payment_baskets` Baskets on Items.payment_basket_id = Baskets.id '.
-				'where (Items.`plan_id` = '.(int)$CB_Subs_ID.') AND '.
-					// Use a NOT IN criteria to be sure to add this record only once even if the script is started several times
-					'(Items.payment_basket_id NOT IN (SELECT transaction_id FROM `'.$rdTable.'`));';
-			
-		//}
-			
-		$sReturn.=$this->runSQL($sSQL, 'Transactions for plan '.(int)$CB_Subs_ID.' are ', $rdTable, 
-			(DEBUG&&($this->DebugUser_ID!='')?'(Baskets.user_id='.$this->DebugUser_ID.')':''));		
+        return true;
+    }
 
-		// -----------------------------------------------------------------
-		// 2. Migrate records of #_cbsubs_subscriptions i.e. get subscriptions
-		// -----------------------------------------------------------------
-		
-		$rdTable=$this->JConfig->dbprefix.'rd_subs_product2user';
-		
-		if($sCBSubsItemType!=='merchandise')
-		{
-			// It's a subscription (a "usersubscription")
-			// We need to correctly handle dates (start and end date of the subscription)
-			
-			list($fields, $values) = $this->keyToSQL(array(		
-				'userid' => 'CBSubs.user_id',
-				'payment_id' => 'T.id',
-				'product_id' => (int)$RD_Subs_ID,
-				'download_id' => '0',
-				'status' => 'case when (Items.stop_date < NOW()) then 0 else 1 end',
-				'valid_to' => 'CBSubs.expiry_date', //'case when (stop_date=null) then start_date else stop_date end',
-				'created' => 'CBSubs.subscription_date',// 'cast(Items.start_date as date)',
-				'extra_information' => 'Items.artnum',                           // CBSubs invoice number
-				'private_information' => 'concat_ws(\' \',\'Record migrated from CB Subs, order\',Items.artnum)',		
-				'reminder_sent' => '0',
-				'ordercode' => 'Items.payment_basket_id',
-				'order_id' => '0',
-				'ordercount' => '1'
-			));	
-			
-			$sSQL='insert into `'.$rdTable.'` ('.$fields.') select distinct '.$values.' '.
-				'from `'.$this->JConfig->dbprefix.'cbsubs_subscriptions` CBSubs '.
-					'inner join `'.$this->JConfig->dbprefix.'cbsubs_payment_items` Items on CBSubs.id = Items.subscription_id '.
-					'inner join `'.$this->JConfig->dbprefix.'rd_subs_transactions` T on T.ordercode = Items.payment_basket_id '.
-				'where (CBSubs.`plan_id` = '.(int)$CB_Subs_ID.') AND (Items.item_type="'.$sCBSubsItemType.'");';
-				
-		} else // if($sCBSubsItemType!=='merchandise')
-		{
-			
-			// It's a product (a "merchandise"); one-time fee.   A product don't have expiration, just like buying a 
-			// service (fi.i. unhacking of a website)
-			
-			list($fields, $values) = $this->keyToSQL(array(		
-				'userid' => 'Baskets.user_id',
-				'payment_id' => 'T.id',
-				'product_id' => (int)$RD_Subs_ID,
-				'download_id' => '0',
-				'status' => 'case when (Items.start_date < NOW()) then 0 else 1 end',  // Not really usefull, it's a product
-				'valid_to' => 'Items.start_date', 
-				'created' => 'Items.start_date',
-				'extra_information' => 'Items.artnum',                           
-				'private_information' => 'concat_ws(\' \',\'Record migrated from CB Subs, order\',Items.artnum)',		
-				'reminder_sent' => '0',
-				'ordercode' => 'Items.payment_basket_id',
-				'order_id' => '0',
-				'ordercount' => '1'
-			));	
-			
-			$sSQL='insert into `'.$rdTable.'` ('.$fields.') select distinct '.$values.' '.
-				'from `'.$this->JConfig->dbprefix.'cbsubs_payment_items` Items '.
-					'inner join `'.$this->JConfig->dbprefix.'cbsubs_payment_baskets` Baskets on Items.payment_basket_id = Baskets.id '.
-					'inner join `'.$this->JConfig->dbprefix.'rd_subs_transactions` T on T.ordercode = Items.payment_basket_id '.
-				'where (Items.`plan_id` = '.(int)$CB_Subs_ID.') AND (Items.item_type="'.$sCBSubsItemType.'");';
-				
-		} // if($sCBSubsItemType!=='merchandise')
-		
-		$sReturn.=$this->runSQL($sSQL, 'Subscriptions', $rdTable, '');							
+    /**
+     * Shwo debugging info
+     */
+    public function debug()
+    {
+        if ($this->mysqli === null) {
+            echo '<p class="text-warning error">Please put this script in the same folder of your Joomla\'s <em>configuration.php</em> file i.e. in the root folder of your website.</p>';
+            die();
+        }
 
-		// -----------------------------------------------------------------
-		// 3. Migrate records of #_comprofiler i.e. get users	
-		//	  Migrate all users and not only the ones concerned by the subscription	(CB_Subs_ID)
-		// -----------------------------------------------------------------
-		
-		list($fields, $values) = $this->keyToSQL(array(
-			'userid' => 'CBSubs.user_id',
-			'firstname' => 'if(CB.cb_subs_inv_first_name is null, if(CB.firstname is null, "", CB.firstname), CB.cb_subs_inv_first_name)',
-			'lastname' => 'if(CB.cb_subs_inv_last_name is null, if(CB.lastname is null, "", CB.lastname), CB.cb_subs_inv_last_name)',
-			'address1' => 'if(cb_subs_inv_address_street is null, P.address_street, cb_subs_inv_address_street)',
-			'address2' => '',
-			'zipcode' => 'if(CB.cb_subs_inv_address_zip is null, P.address_zip, CB.cb_subs_inv_address_zip)',
-			'city' => 'if(CB.cb_subs_inv_address_city is null, P.address_city, CB.cb_subs_inv_address_city)',
-			'country' => 'C.id',
-			'phone' => 'if(CB.cb_subs_inv_contact_phone is null, "", replace(replace(replace(CB.cb_subs_inv_contact_phone," ",""),".",""),"-",""))',
-			'mobile' => '',
-			'is_business' => 'if(CB.cb_subs_inv_vat_number is null, 0, 1)',
-			'companyname' => 'if(CB.cb_subs_inv_payer_business_name is null, if(P.payer_business_name is null, "", P.payer_business_name), CB.cb_subs_inv_payer_business_name)',
-			'vatnumber' => 'if(CB.cb_subs_inv_vat_number is null, "", upper(replace(replace(replace(CB.cb_subs_inv_vat_number," ",""),".",""),"-","")))',
-			'vat_validation_result' => '1',         // ######## VOIR CHAMPS VAT_VERIFICATION DANS betanew_cbsubs_payment_baskets
-			'vat_validation_date' => 'now()',      // "status":"VALID" et oussi "time"
-			'newsletter' => 1, 
-			'profile_image' => 'if(CB.avatar is null, "", CB.avatar)',
-			'ip_address' => 'registeripaddr',
-			'watchful_key' => '',
-			'published' => 1
-		));	
-				
-		$rdTable=$this->JConfig->dbprefix.'rd_subs_users';
-		
-		$sSQL='insert into `'.$rdTable.'` ('.$fields.') select distinct '.$values.' '.
-			'from `'.$this->JConfig->dbprefix.'cbsubs_subscriptions` CBSubs '.
-				'inner join `'.$this->JConfig->dbprefix.'users` U on CBSubs.user_id = U.id '.
-				'inner join `'.$this->JConfig->dbprefix.'rd_subs_product2user` R on CBSubs.user_id = R.userid '.
-				'inner join `'.$this->JConfig->dbprefix.'comprofiler` CB on CBSubs.user_id = CB.user_id '.
-				'inner join `'.$this->JConfig->dbprefix.'cbsubs_payments` P ON (U.id = P.for_user_id) OR IsNull(P.for_user_id) '.
-				'inner join `'.$this->JConfig->dbprefix.'rd_subs_countries` C ON (P.address_country_code = C.country_2_code) '.
-			// Use a NOT IN criteria to be sure to add this record only once even if the script is started several times
-			'WHERE (CBSubs.user_id not in (SELECT userid FROM `'.$rdTable.'`))';
+        $sReturn = '';
 
-		$sReturn.=$this->runSQL($sSQL, 'Users', $rdTable, '');	
+        // Check the presence of CBSubs
 
-		// -----------------------------------------------------------------
-		// 4. Migrate records of #__cbsubs_payment_items i.e. get orders
-		// -----------------------------------------------------------------
-		
-		list($fields, $values) = $this->keyToSQL(array(		
-			'date' => 'start_date',
-			'ordercode' => 'Items.payment_basket_id',
-			'product_id' => (int)$RD_Subs_ID,
-			'coupon_code' => '',
-			'userid' => 'Baskets.user_id',
-			'countrycode' => 'C.id',
-			'ip' => 'Baskets.ip_addresses',
-			'price' => 'rate',
-			'amount' => '0',
-			'discount' => '0',
-			'discount_group' => '',
-			'discount_type' => '',
-			'discount_amount' => 'if(Items.discount_amount is null, 0, Items.discount_amount)'
-		));	
-		
-		$rdTable=$this->JConfig->dbprefix.'rd_subs_orders';
-		
-		$sSQL='insert into `'.$rdTable.'` ('.$fields.') select distinct '.$values.' '.
-			'from `'.$this->JConfig->dbprefix.'cbsubs_payment_items` Items '.				
-				'inner join `'.$this->JConfig->dbprefix.'cbsubs_payment_baskets` Baskets on Items.payment_basket_id = Baskets.id '.
-				'inner join `'.$this->JConfig->dbprefix.'rd_subs_countries` C ON (Baskets.residence_country = C.country_2_code) '.
-			'where (Baskets.user_id=Baskets.user_id);';	
-		
-		$sReturn.=$this->runSQL($sSQL, 'Orders', $rdTable, (DEBUG&&($this->DebugUser_ID!='')?'(Baskets.user_id='.$this->DebugUser_ID.')':''), 'ORDER BY Items.start_date');		
+        $sSQL = "SELECT * FROM INFORMATION_SCHEMA.TABLES ".
+            "WHERE (TABLE_SCHEMA LIKE '".$this->JConfig->db."') AND ".
+            "(TABLE_NAME='".$this->JConfig->dbprefix."cbsubs_subscriptions')";
 
-		$this->mysqli->close();
-		return '<ul class="fa-ul">'.$sReturn.'</ul>';	
-		
-	} // function getProduct()
-   
+        if ($this->mysqli->query($sSQL)) {
+            $arrQueries = array(
+                array("SELECT * ".
+                   "FROM `".$this->JConfig->dbprefix."cbsubs_subscriptions` CBSubs ".
+                   "WHERE CBSubs.user_id = ".$this->DebugUser_ID.";","cbsubs_subscriptions"),
+                //array("SELECT * FROM `".$this->JConfig->dbprefix."comprofiler` WHERE user_id=".$this->DebugUser_ID.";","comprofiler"),
+                //array("SELECT * FROM `".$this->JConfig->dbprefix."rd_subs_users` WHERE userid=".$this->DebugUser_ID.";","rd_subs_users"),
+                array("SELECT Items.* ".
+                   "FROM `".$this->JConfig->dbprefix."cbsubs_payment_items` Items ".
+                   (DEBUG?"INNER JOIN `".$this->JConfig->dbprefix."cbsubs_payment_baskets` Baskets ON (Baskets.id=Items.payment_basket_id) AND (Baskets.user_id='".$this->DebugUser_ID."') ":"").
+                   //"INNER JOIN `".$this->JConfig->dbprefix."cbsubs_subscriptions` CBSubs ON CBSubs.id=Items.subscription_id ".
+                   //"WHERE (CBSubs.user_id = ".$this->DebugUser_ID.") ".
+                   //"AND (Items.item_type='usersubscription') ".  // Force and only return usersubscription.  Use "merchandise" for products
+                   "ORDER BY Items.id;","cbsubs_payment_items"),
+                array("SELECT Baskets.* ".
+                   "FROM `".$this->JConfig->dbprefix."cbsubs_payment_baskets` Baskets ".
+                   "INNER JOIN `".$this->JConfig->dbprefix."cbsubs_payment_items` Items ON Items.payment_basket_id=Baskets.id ".
+                   "WHERE (Baskets.user_id = ".$this->DebugUser_ID.") ".
+                   "ORDER BY Baskets.id;","cbsubs_payment_baskets"),
+                array("SELECT * FROM `".$this->JConfig->dbprefix."rd_subs_orders` ORDER BY date","rd_subs_orders"),
+                array("SELECT * FROM `".$this->JConfig->dbprefix."rd_subs_transactions` ORDER BY date","rd_subs_transactions"),
+                array("SELECT * FROM `".$this->JConfig->dbprefix."rd_subs_product2user` ORDER BY valid_to","rd_subs_product2user")
+            );
+
+            foreach ($arrQueries as $query) {
+                if ($results = $this->mysqli->query($query[0])) {
+
+                    // For display purpose
+                    $arr = array();
+                    while ($row = mysqli_fetch_assoc($results)) {
+                        $arr[] = $row;
+                    }
+
+                    $sReturn .= '<hr/><h3>'.$query[1].'</h3>';
+
+                    if (count($arr) > 0) {
+                        $sReturn .= aeSecureFct::array2table($arr, 1200);
+                    } else {
+                        $sReturn .= '<p class="bg-danger error">No record</p>';
+                    }
+                } else {
+                    $sReturn .= '<p class="bg-danger error">Error in SQL:<br/>'.$query[0].'</p>';
+                }
+            }
+        } else {
+            $sReturn .= '<p class="bg-danger error">CBSubs not found (table #_cbsubs_subscriptions not found).</p>';
+        } // if ($mysqli->query($sSQL))
+
+        $this->mysqli->close();
+        return $sReturn;
+    } // function debug()
+
+    /**
+     * Retrieve a recordset from the database and display it as a nice HTML table
+     */
+    public function showTable($CB_Subs_ID)
+    {
+        if ($this->mysqli === null) {
+            echo '<p class="text-warning error">Please put this script in the same folder of your Joomla\'s <em>configuration.php</em> file i.e. in the root folder of your website.</p>';
+            die();
+        }
+
+        $sReturn = '';
+
+        // Check the presence of CBSubs
+
+        $sSQL = "SELECT * FROM INFORMATION_SCHEMA.TABLES ".
+            "WHERE (TABLE_SCHEMA LIKE '".$this->JConfig->db."') AND ".
+            "(TABLE_NAME='".$this->JConfig->dbprefix."cbsubs_subscriptions')";
+
+        if ($this->mysqli->query($sSQL)) {
+            $sSQL = "SELECT P.name AS product, user_id, U.name AS username, CAST(subscription_date AS date) AS created, ".
+               "CAST(expiry_date AS date) AS valid_to, " .
+               "CASE WHEN (expiry_date < Now()) THEN 0 ELSE 1 END AS status ".
+               "FROM `".$this->JConfig->dbprefix."cbsubs_subscriptions` CB ".
+               "INNER JOIN `".$this->JConfig->dbprefix."cbsubs_plans` P ON CB.plan_id = P.id ".
+               "INNER JOIN `".$this->JConfig->dbprefix."users` U ON CB.user_id = U.id ".
+               "WHERE CB.plan_id = ".$CB_Subs_ID.";";
+
+            if ($results = $this->mysqli->query($sSQL)) {
+
+                // For display purpose
+                $arr = array();
+                while ($row = mysqli_fetch_assoc($results)) {
+                    $arr[] = $row;
+                }
+
+                if (count($arr) > 0) {
+                    $sReturn .= aeSecureFct::array2table($arr, 1200);
+                } else { // if(count($arr)>0)
+
+                    // Check if the plan is a merchandise and not a subscription (i.e. no entries in cbsubs_subscriptions but well in
+                    // cbsubs_payment_items)
+
+                    $sSQL = 'select Baskets.user_id, Items.* '.
+                        'from `'.$this->JConfig->dbprefix.'cbsubs_payment_items` Items '.
+                            'inner join `'.$this->JConfig->dbprefix.'cbsubs_payment_baskets` Baskets on Items.payment_basket_id = Baskets.id '.
+                        'where plan_id = '.$CB_Subs_ID.';';
+
+                    if ($results = $this->mysqli->query($sSQL)) {
+
+                        // For display purpose
+                        $arr = array();
+                        while ($row = mysqli_fetch_assoc($results)) {
+                            $arr[] = $row;
+                        }
+                        $sReturn .= aeSecureFct::array2table($arr, 1200);
+                    } else {
+                        $sReturn .= '<p class="bg-danger error">--No subscriptions in CBSubs for plan '.$CB_Subs_ID.'.</p>';
+                    }
+                } // if(count($arr)>0)
+            } else { // if ($results = $this->mysqli->query($sSQL))
+
+                $sReturn .= '<p class="bg-danger error">**No subscriptions in CBSubs for plan '.$CB_Subs_ID.'.</p>';
+            } // if ($results = $this->mysqli->query($sSQL))
+        } else { // if ($this->mysqli->query($sSQL))
+
+            $sReturn .= '<p class="bg-danger error">CBSubs not found (table #_cbsubs_subscriptions not found).</p>';
+        } // if ($this->mysqli->query($sSQL))
+
+        $this->mysqli->close();
+        return $sReturn;
+    } // function showTable()
+
+    /**
+     * Return the name of the CBSubs plan
+     */
+    public function getPlan($CB_Subs_ID)
+    {
+        $sReturn = 'unknown';
+
+        if ($this->mysqli === null) {
+            echo '<p class="text-warning error">Please put this script in the same folder of your Joomla\'s <em>configuration.php</em> file i.e. in the root folder of your website.</p>';
+            die();
+        }
+
+        $sSQL = 'SELECT name as plan FROM '.$this->JConfig->dbprefix.'cbsubs_plans WHERE ID='.(int)$CB_Subs_ID.';';
+
+        if ($result = $this->mysqli->query($sSQL)) {
+            $arr = $result->fetch_array(MYSQLI_ASSOC);
+            $sReturn = isset($arr['plan']) ? $arr['plan'] : 'unknown';
+        }
+
+        $this->mysqli->close();
+        return $sReturn;
+    } // function getPlan()
+
+    /**
+     * Return the name of the RD-Subs product
+     */
+    public function getProduct($RD_Subs_ID)
+    {
+        $sReturn = 'unknown';
+
+        if ($this->mysqli === null) {
+            echo '<p class="text-warning error">Please put this script in the same folder of your Joomla\'s <em>configuration.php</em> file i.e. in the root folder of your website.</p>';
+            die();
+        }
+
+        $sSQL = 'SELECT name as product FROM '.$this->JConfig->dbprefix.'rd_subs_products WHERE ID='.(int)$RD_Subs_ID.';';
+
+        if ($result = $this->mysqli->query($sSQL)) {
+            $arr = $result->fetch_array(MYSQLI_ASSOC);
+            $sReturn = isset($arr['product']) ? $arr['product'] : 'unknown';
+        }
+
+        $this->mysqli->close();
+        return $sReturn;
+    } // function getProduct()
+
+    /**
+     * Debuging - Empty RD concerned tables
+     */
+    public function emptyTables()
+    {
+        $arr = array('rd_subs_orders','rd_subs_product2user','rd_subs_transactions','rd_subs_users');
+
+        foreach ($arr as $tbl) {
+            $rdTable = $this->JConfig->dbprefix.$tbl;
+            $this->resetTable($rdTable);
+        }
+
+        return implode($arr, ', ').' have been clean up';
+    } // function emptyTables()
+
+    /**
+     * Run a DML query like INSERT INTO or TRUNCATE or UPDATE ...
+     */
+    private function runSQL($sSQL, $text, $rdTable, $extra_where = '', $orderby = '')
+    {
+        $sSQL = rtrim($sSQL, ' ;');
+
+        if ($extra_where !== '') {
+            if (stripos($sSQL, 'WHERE') !== false) {
+                // Add an extra condition
+                $sSQL .= ' AND '.$extra_where;
+            } else {
+                // Add a condition
+                $sSQL .= ' WHERE '.$extra_where;
+            }
+        } // if ($extra_where!=='')
+
+        if ($orderby !== '') {
+            $sSQL .= ' '.$orderby;
+        }
+
+        if (DEBUG) {
+            echo '<code class="language-sql" language="sql">'.$sSQL.'</code>';
+        }
+
+        if ($this->mysqli->query($sSQL) === true) {
+            $sReturn = '<li><i class="text-success fa-li fa fa-check"></i>'.$text.' migrated to '.$this->JConfig->dbprefix.$rdTable.'</li>';
+        } else {
+            $sReturn = '<li><i class="text-danger fa-li fa fa-exclamation-triangle"></i>Error - '.$this->mysqli->error.'<br/>'.$sSQL.'</li>';
+        }
+
+        return $sReturn;
+    } // function runSQL()
+
+    /**
+    * Reset : empty the table and reset the auto_increment to 1
+    */
+    private function resetTable($rdTable)
+    {
+        $this->mysqli->query('truncate table `'.$rdTable.'`;');
+        $this->mysqli->query('alter table `'.$rdTable.'` AUTO_INCREMENT = 1');
+
+        return true;
+    } // function resetTable()
+
+    /**
+     * Helper. Implodes an array into a list of fields and a list of values.
+     */
+    private function keyToSQL($arrKeys)
+    {
+        $fields = '';
+        $values = '';
+        foreach ($arrKeys as $name => $value) {
+            $fields .= '`'.$name.'`, ';
+            $values .= ($value == ''?'""':$value).' as `'.$name.'`, ';
+        }
+        $fields = rtrim($fields, ', ');
+        $values = rtrim($values, ', ');
+
+        return array($fields, $values);
+    } // function keyToSQL()
+
+    /**
+     * Start the migration; get records from CBSubs and insert them into RD-Subs tables
+     */
+    public function startMigration($CB_Subs_ID, $RD_Subs_ID)
+    {
+        $sReturn = '';
+
+        if ($this->mysqli === null) {
+            echo '<p class="text-warning error">Please put this script in the same folder of your Joomla\'s <em>configuration.php</em> file i.e. in the root folder of your website.</p>';
+            die();
+        }
+
+        // Get if the plan is a usersubscription or a merchandise (a product; one-time fee)
+
+        $sSQL = 'SELECT item_type FROM '.$this->JConfig->dbprefix.'cbsubs_plans WHERE ID='.(int)$CB_Subs_ID.';';
+
+        if ($result = $this->mysqli->query($sSQL)) {
+            $arr = $result->fetch_array(MYSQLI_ASSOC);
+            $sCBSubsItemType = isset($arr['item_type']) ? $arr['item_type'] : 'unknown';
+        }
+
+        if ($sCBSubsItemType == 'unknown') {
+            die('Invalid CBSubs item_type');
+        }
+
+        // -----------------------------------------------------------------
+        // 1. Migrate records of #__cbsubs_payment_items i.e. get transactions
+        // -----------------------------------------------------------------
+
+        $rdTable = $this->JConfig->dbprefix.'rd_subs_transactions';
+    /*
+        if($sCBSubsItemType!=='merchandise')
+        {
+            // It's a subscription (a "usersubscription")
+
+            list($fields, $values) = $this->keyToSQL(array(
+                'transaction_id' => 'Items.payment_basket_id ',
+                'userid' => 'CBSubs.user_id',
+                'details' => 'Items.artnum',
+                'amount' => 'Items.rate',
+                'date' => 'Items.start_date',
+                'type' => 'Baskets.txn_type',
+                'email_paypal' => 'Baskets.payer_email',
+                'ordercode' => 'Baskets.id',                   // Link with cbsubs_payment_baskets.id
+                'plugin' => '"CBSubs"'                        // Specify CBSubs to make intuitive the origin of the record
+            ));
+
+            $sSQL='insert into `'.$rdTable.'` ('.$fields.') select distinct '.$values.' '.
+                'from `'.$this->JConfig->dbprefix.'cbsubs_subscriptions` CBSubs '.
+                    'inner join `'.$this->JConfig->dbprefix.'cbsubs_payment_items` Items on CBSubs.id = Items.subscription_id '.
+                    'inner join `'.$this->JConfig->dbprefix.'cbsubs_payment_baskets` Baskets on Items.payment_basket_id = Baskets.id '.
+                'where (CBSubs.`plan_id` = '.(int)$CB_Subs_ID.') AND (Baskets.user_id=CBSubs.user_id) AND '.
+                    // Use a NOT IN criteria to be sure to add this record only once even if the script is started several times
+                    '(Items.payment_basket_id NOT IN (SELECT transaction_id FROM `'.$rdTable.'`));';
+        } else {
+            */
+            // It's a product (a "merchandise")
+
+            list($fields, $values) = $this->keyToSQL(array(
+                'transaction_id' => 'Items.payment_basket_id ',
+                'userid' => 'Baskets.user_id',
+                'details' => 'Items.artnum',
+                'amount' => 'Items.rate',
+                'date' => 'Items.start_date',
+                'type' => 'Baskets.txn_type',
+                'email_paypal' => 'Baskets.payer_email',
+                'ordercode' => 'Baskets.id',                   // Link with cbsubs_payment_baskets.id
+                'plugin' => '"CBSubs"'                        // Specify CBSubs to make intuitive the origin of the record
+            ));
+
+        $sSQL = 'insert into `'.$rdTable.'` ('.$fields.') select distinct '.$values.' '.
+                'from `'.$this->JConfig->dbprefix.'cbsubs_payment_items` Items '.
+                    'inner join `'.$this->JConfig->dbprefix.'cbsubs_payment_baskets` Baskets on Items.payment_basket_id = Baskets.id '.
+                'where (Items.`plan_id` = '.(int)$CB_Subs_ID.') AND '.
+                    // Use a NOT IN criteria to be sure to add this record only once even if the script is started several times
+                    '(Items.payment_basket_id NOT IN (SELECT transaction_id FROM `'.$rdTable.'`));';
+
+        //}
+
+        $sReturn .= $this->runSQL($sSQL, 'Transactions for plan '.(int)$CB_Subs_ID.' are ', $rdTable,
+            (DEBUG && ($this->DebugUser_ID != '')?'(Baskets.user_id='.$this->DebugUser_ID.')':''));
+
+        // -----------------------------------------------------------------
+        // 2. Migrate records of #_cbsubs_subscriptions i.e. get subscriptions
+        // -----------------------------------------------------------------
+
+        $rdTable = $this->JConfig->dbprefix.'rd_subs_product2user';
+
+        if ($sCBSubsItemType !== 'merchandise') {
+            // It's a subscription (a "usersubscription")
+            // We need to correctly handle dates (start and end date of the subscription)
+
+            list($fields, $values) = $this->keyToSQL(array(
+                'userid' => 'CBSubs.user_id',
+                'payment_id' => 'T.id',
+                'product_id' => (int)$RD_Subs_ID,
+                'download_id' => '0',
+                'status' => 'case when (Items.stop_date < NOW()) then 0 else 1 end',
+                'valid_to' => 'CBSubs.expiry_date', //'case when (stop_date=null) then start_date else stop_date end',
+                'created' => 'CBSubs.subscription_date',// 'cast(Items.start_date as date)',
+                'extra_information' => 'Items.artnum',                           // CBSubs invoice number
+                'private_information' => 'concat_ws(\' \',\'Record migrated from CB Subs, order\',Items.artnum)',
+                'reminder_sent' => '0',
+                'ordercode' => 'Items.payment_basket_id',
+                'order_id' => '0',
+                'ordercount' => '1'
+            ));
+
+            $sSQL = 'insert into `'.$rdTable.'` ('.$fields.') select distinct '.$values.' '.
+                'from `'.$this->JConfig->dbprefix.'cbsubs_subscriptions` CBSubs '.
+                    'inner join `'.$this->JConfig->dbprefix.'cbsubs_payment_items` Items on CBSubs.id = Items.subscription_id '.
+                    'inner join `'.$this->JConfig->dbprefix.'rd_subs_transactions` T on T.ordercode = Items.payment_basket_id '.
+                'where (CBSubs.`plan_id` = '.(int)$CB_Subs_ID.') AND (Items.item_type="'.$sCBSubsItemType.'");';
+        } else { // if($sCBSubsItemType!=='merchandise')
+            // It's a product (a "merchandise"); one-time fee.   A product don't have expiration, just like buying a
+            // service (fi.i. unhacking of a website)
+
+            list($fields, $values) = $this->keyToSQL(array(
+                'userid' => 'Baskets.user_id',
+                'payment_id' => 'T.id',
+                'product_id' => (int)$RD_Subs_ID,
+                'download_id' => '0',
+                'status' => 'case when (Items.start_date < NOW()) then 0 else 1 end',  // Not really usefull, it's a product
+                'valid_to' => 'Items.start_date',
+                'created' => 'Items.start_date',
+                'extra_information' => 'Items.artnum',
+                'private_information' => 'concat_ws(\' \',\'Record migrated from CB Subs, order\',Items.artnum)',
+                'reminder_sent' => '0',
+                'ordercode' => 'Items.payment_basket_id',
+                'order_id' => '0',
+                'ordercount' => '1'
+            ));
+
+            $sSQL = 'insert into `'.$rdTable.'` ('.$fields.') select distinct '.$values.' '.
+                'from `'.$this->JConfig->dbprefix.'cbsubs_payment_items` Items '.
+                    'inner join `'.$this->JConfig->dbprefix.'cbsubs_payment_baskets` Baskets on Items.payment_basket_id = Baskets.id '.
+                    'inner join `'.$this->JConfig->dbprefix.'rd_subs_transactions` T on T.ordercode = Items.payment_basket_id '.
+                'where (Items.`plan_id` = '.(int)$CB_Subs_ID.') AND (Items.item_type="'.$sCBSubsItemType.'");';
+        } // if($sCBSubsItemType!=='merchandise')
+
+        $sReturn .= $this->runSQL($sSQL, 'Subscriptions', $rdTable, '');
+
+        // -----------------------------------------------------------------
+        // 3. Migrate records of #_comprofiler i.e. get users
+        //	  Migrate all users and not only the ones concerned by the subscription	(CB_Subs_ID)
+        // -----------------------------------------------------------------
+
+        list($fields, $values) = $this->keyToSQL(array(
+            'userid' => 'CBSubs.user_id',
+            'firstname' => 'if(CB.cb_subs_inv_first_name is null, if(CB.firstname is null, "", CB.firstname), CB.cb_subs_inv_first_name)',
+            'lastname' => 'if(CB.cb_subs_inv_last_name is null, if(CB.lastname is null, "", CB.lastname), CB.cb_subs_inv_last_name)',
+            'address1' => 'if(cb_subs_inv_address_street is null, P.address_street, cb_subs_inv_address_street)',
+            'address2' => '',
+            'zipcode' => 'if(CB.cb_subs_inv_address_zip is null, P.address_zip, CB.cb_subs_inv_address_zip)',
+            'city' => 'if(CB.cb_subs_inv_address_city is null, P.address_city, CB.cb_subs_inv_address_city)',
+            'country' => 'C.id',
+            'phone' => 'if(CB.cb_subs_inv_contact_phone is null, "", replace(replace(replace(CB.cb_subs_inv_contact_phone," ",""),".",""),"-",""))',
+            'mobile' => '',
+            'is_business' => 'if(CB.cb_subs_inv_vat_number is null, 0, 1)',
+            'companyname' => 'if(CB.cb_subs_inv_payer_business_name is null, if(P.payer_business_name is null, "", P.payer_business_name), CB.cb_subs_inv_payer_business_name)',
+            'vatnumber' => 'if(CB.cb_subs_inv_vat_number is null, "", upper(replace(replace(replace(CB.cb_subs_inv_vat_number," ",""),".",""),"-","")))',
+            'vat_validation_result' => '1',         // ######## VOIR CHAMPS VAT_VERIFICATION DANS betanew_cbsubs_payment_baskets
+            'vat_validation_date' => 'now()',      // "status":"VALID" et oussi "time"
+            'newsletter' => 1,
+            'profile_image' => 'if(CB.avatar is null, "", CB.avatar)',
+            'ip_address' => 'registeripaddr',
+            'watchful_key' => '',
+            'published' => 1
+        ));
+
+        $rdTable = $this->JConfig->dbprefix.'rd_subs_users';
+
+        $sSQL = 'insert into `'.$rdTable.'` ('.$fields.') select distinct '.$values.' '.
+            'from `'.$this->JConfig->dbprefix.'cbsubs_subscriptions` CBSubs '.
+                'inner join `'.$this->JConfig->dbprefix.'users` U on CBSubs.user_id = U.id '.
+                'inner join `'.$this->JConfig->dbprefix.'rd_subs_product2user` R on CBSubs.user_id = R.userid '.
+                'inner join `'.$this->JConfig->dbprefix.'comprofiler` CB on CBSubs.user_id = CB.user_id '.
+                'inner join `'.$this->JConfig->dbprefix.'cbsubs_payments` P ON (U.id = P.for_user_id) OR IsNull(P.for_user_id) '.
+                'inner join `'.$this->JConfig->dbprefix.'rd_subs_countries` C ON (P.address_country_code = C.country_2_code) '.
+            // Use a NOT IN criteria to be sure to add this record only once even if the script is started several times
+            'WHERE (CBSubs.user_id not in (SELECT userid FROM `'.$rdTable.'`))';
+
+        $sReturn .= $this->runSQL($sSQL, 'Users', $rdTable, '');
+
+        // -----------------------------------------------------------------
+        // 4. Migrate records of #__cbsubs_payment_items i.e. get orders
+        // -----------------------------------------------------------------
+
+        list($fields, $values) = $this->keyToSQL(array(
+            'date' => 'start_date',
+            'ordercode' => 'Items.payment_basket_id',
+            'product_id' => (int)$RD_Subs_ID,
+            'coupon_code' => '',
+            'userid' => 'Baskets.user_id',
+            'countrycode' => 'C.id',
+            'ip' => 'Baskets.ip_addresses',
+            'price' => 'rate',
+            'amount' => '0',
+            'discount' => '0',
+            'discount_group' => '',
+            'discount_type' => '',
+            'discount_amount' => 'if(Items.discount_amount is null, 0, Items.discount_amount)'
+        ));
+
+        $rdTable = $this->JConfig->dbprefix.'rd_subs_orders';
+
+        $sSQL = 'insert into `'.$rdTable.'` ('.$fields.') select distinct '.$values.' '.
+            'from `'.$this->JConfig->dbprefix.'cbsubs_payment_items` Items '.
+                'inner join `'.$this->JConfig->dbprefix.'cbsubs_payment_baskets` Baskets on Items.payment_basket_id = Baskets.id '.
+                'inner join `'.$this->JConfig->dbprefix.'rd_subs_countries` C ON (Baskets.residence_country = C.country_2_code) '.
+            'where (Baskets.user_id=Baskets.user_id);';
+
+        $sReturn .= $this->runSQL($sSQL, 'Orders', $rdTable, (DEBUG && ($this->DebugUser_ID != '')?'(Baskets.user_id='.$this->DebugUser_ID.')':''), 'ORDER BY Items.start_date');
+
+        $this->mysqli->close();
+        return '<ul class="fa-ul">'.$sReturn.'</ul>';
+    } // function getProduct()
 } // class aeSecureMigrate
 
-if (DEBUG===true) {
+if (DEBUG === true) {
     ini_set("display_errors", "1");
     ini_set("display_startup_errors", "1");
     ini_set("html_errors", "1");
@@ -777,89 +685,84 @@ if (DEBUG===true) {
     ini_set('error_reporting', E_ALL & ~ E_NOTICE);
 }
 
-$task=aeSecureFct::getParam('task', 'string', '', false);
+$task = aeSecureFct::getParam('task', 'string', '', false);
 
-$CB_Subs_ID=abs(aeSecureFct::getParam('cbSubs', 'int', 0, false));
-$RD_Subs_ID=abs(aeSecureFct::getParam('rdSubs', 'int', 0, false));
+$CB_Subs_ID = abs(aeSecureFct::getParam('cbSubs', 'int', 0, false));
+$RD_Subs_ID = abs(aeSecureFct::getParam('rdSubs', 'int', 0, false));
 
-$aeSMigrate=new aeSecureMigrate();
+$aeSMigrate = new aeSecureMigrate();
 
-switch ($task) 
-{
-	
-	case 'debug':
-	
-		echo $aeSMigrate->debug();
-		die();
-		break;
-		
-	case 'empty':
-	
-		echo $aeSMigrate->emptyTables();
-		die();
-		break;
-		
-	case 'getList':
-	
-		if ($CB_Subs_ID>0) 
-		{
-			echo $aeSMigrate->showTable($CB_Subs_ID);
-			die();
-		} else {
-			die('cbSubs parameter is missing');
-		}
-	
-		break;
-		
-	case 'getPlan':
-	
-		if ($CB_Subs_ID>0) 
-		{			
-			echo $aeSMigrate->getPlan($CB_Subs_ID);
-			die();
-		} else {
-			die('cbSubs parameter is missing');
-		}
-		
-		break;
-		
-	case 'getProduct':
-	
-		if ($RD_Subs_ID>0) 
-		{			
-			echo $aeSMigrate->getProduct($RD_Subs_ID);
-			die();
-		} else {
-			die('rdSubs parameter is missing');
-		}
-		
-		break;
-		
-	case 'doIt':
-	
-		if (($CB_Subs_ID>0) && ($RD_Subs_ID>0))
-		{			
-			echo $aeSMigrate->startMigration($CB_Subs_ID, $RD_Subs_ID);
-			die();
-		} else {
-			die('cbSubs and rdSubs parameters are missing');
-		}
-		
-		break;
-		
-	case 'killMe':
-	
-		echo '<p class="text-success">The file '.__FILE__.' has been removed from your server</p>';
-		unlink(__FILE__);
-		
-		die();
-		
+switch ($task) {
+
+    case 'debug':
+
+        echo $aeSMigrate->debug();
+        die();
+        break;
+
+    case 'empty':
+
+        echo $aeSMigrate->emptyTables();
+        die();
+        break;
+
+    case 'getList':
+
+        if ($CB_Subs_ID > 0) {
+            echo $aeSMigrate->showTable($CB_Subs_ID);
+            die();
+        } else {
+            die('cbSubs parameter is missing');
+        }
+
+        break;
+
+    case 'getPlan':
+
+        if ($CB_Subs_ID > 0) {
+            echo $aeSMigrate->getPlan($CB_Subs_ID);
+            die();
+        } else {
+            die('cbSubs parameter is missing');
+        }
+
+        break;
+
+    case 'getProduct':
+
+        if ($RD_Subs_ID > 0) {
+            echo $aeSMigrate->getProduct($RD_Subs_ID);
+            die();
+        } else {
+            die('rdSubs parameter is missing');
+        }
+
+        break;
+
+    case 'doIt':
+
+        if (($CB_Subs_ID > 0) && ($RD_Subs_ID > 0)) {
+            echo $aeSMigrate->startMigration($CB_Subs_ID, $RD_Subs_ID);
+            die();
+        } else {
+            die('cbSubs and rdSubs parameters are missing');
+        }
+
+        break;
+
+    case 'killMe':
+
+        echo '<p class="text-success">The file '.__FILE__.' has been removed from your server</p>';
+        unlink(__FILE__);
+
+        die();
+
 } // case
 
 unset($aeSMigrate);
 
-?> 
-		
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -871,18 +774,18 @@ unset($aeSMigrate);
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8;" />
 		<title>aeSecure - From CBSubs to RD-Subs</title>
-		<link href= "data:image/x-icon;base64,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" rel="shortcut icon" type="image/vnd.microsoft.icon"/>  
+		<link href= "data:image/x-icon;base64,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" rel="shortcut icon" type="image/vnd.microsoft.icon"/>
 		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 		<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.25.3/css/theme.ice.min.css" rel="stylesheet" media="screen" />
 		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" media="screen" />
-      
+
 		<style>
-			#Result { 
+			#Result {
 				margin-top: 25px;
 			}
 			.error {
 				margin: 10px;
-				font-size: 2em;   
+				font-size: 2em;
 			}
 			.ajax_loading {
 				display: inline-block;
@@ -896,7 +799,7 @@ unset($aeSMigrate);
 				border: 1px solid green;
 			}
 			.joomla ul {
-				padding-top: 8px;    
+				padding-top: 8px;
 			}
 			.joomla li {
 				min-width: 210px;
@@ -923,31 +826,31 @@ unset($aeSMigrate);
 			}
 			</style>
 	</head>
-   
+
 	<body>
         <div class="container">
-		
+
             <div class="page-header"><h1>From CB Subscriptions to RD-Subs</h1></div>
 
 			<div class="alert alert-danger alert-dismissible" role="alert">
 				<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 				<strong>Be aware !</strong>&nbsp;This script will add records to : #_rd_subs_orders, #_rd_subs_product2user, #_rd_subs_transactions and #_rd_subs_users. <strong>No backup is taken by this script so, please, know what you're doing (and at least, take a backup before)</strong>
 			</div>
-			
+
 			<div class="alert alert-info alert-dismissible" role="alert">
 				<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 				<strong>No support provided</strong>&nbsp;Please take a look on the startMigration() function of this script to be sure that the script do what you're expecting.</strong>
 			</div>
-			
+
 			<ul class="fa-ul">
 				<li><i class="fa-li fa fa-check"></i>1. Type your CB Subs plan ID and click on the <i class="fa fa-shopping-cart" aria-hidden="true"></i> button. If your plan name is the good one, click on the <strong>1. Show customers</strong> button. Verify if concerned records are the good ones.</li>
 				<li><i class="fa-li fa fa-check"></i>2. Type your RD-Subs product ID and click on the <i class="fa fa-shopping-cart" aria-hidden="true"></i> button. If your product name is the good one, press the <strong>2. Migrate to RD-Subs</strong> button.</li>
 				<li><i class="fa-li fa fa-check"></i>3. Repeat for each plans to migrate and press the <strong>3. Remove this script </strong> button when finished.</li>
 			</ul>
 			<hr/>
-         
-            <form id="form" class="form-inline">  
-					
+
+            <form id="form" class="form-inline">
+
 				<div class="form-group">
 					<label for="cbSubs">CB Subs plan ID</label>&nbsp;
 					<input id="cbSubs" value="8" size="5" width="5" class="form-control" placeholder="#CB">&nbsp;&nbsp;&nbsp;<button type="button" id="btnGetCBPlan" class="btn btn-default"><i class="fa fa-shopping-cart" aria-hidden="true"></i></button>&nbsp;
@@ -958,47 +861,47 @@ unset($aeSMigrate);
 					<span class="text-success" id="ProductName">&nbsp;</span>
 				</div>
 				<hr/>
-                <div class="row"> 
+                <div class="row">
                     <button type="button" disabled="disabled" id="btnGetList" class="btn btn-primary"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;1. Show customers</button>
                     <button type="button" disabled="disabled" id="btnDoIt" class="btn btn-success"><i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;2. Migrate to RD-Subs</button>
                     <button type="button" id="btnKillMe" class="btn btn-danger pull-right" style="margin-left:10px;"><i class="fa fa-eraser" aria-hidden="true"></i>&nbsp;3. Remove this script</button>
-					<?php 
-						if (DEBUG) {
-							echo '<button type="button" id="btnDebug" class="btn btn-warning pull-right" style="margin-left:10px;"><i class="fa fa-bug" aria-hidden="true"></i>&nbsp;DEBUG</button>';
-							echo '<button type="button" id="btnEmpty" class="btn btn-primary pull-right" style="margin-left:10px;"><i class="fa fa-bug" aria-hidden="true"></i>&nbsp;Empty RD tables</button>';
-							echo '<button type="button" id="btnaeSecure" class="btn btn-primary pull-right" style="margin-left:10px;"><i class="fa fa-bug" aria-hidden="true"></i>&nbsp;aeSecure</button>';
-						} 
-					?>
-                </div>     
+					<?php
+                        if (DEBUG) {
+                            echo '<button type="button" id="btnDebug" class="btn btn-warning pull-right" style="margin-left:10px;"><i class="fa fa-bug" aria-hidden="true"></i>&nbsp;DEBUG</button>';
+                            echo '<button type="button" id="btnEmpty" class="btn btn-primary pull-right" style="margin-left:10px;"><i class="fa fa-bug" aria-hidden="true"></i>&nbsp;Empty RD tables</button>';
+                            echo '<button type="button" id="btnaeSecure" class="btn btn-primary pull-right" style="margin-left:10px;"><i class="fa fa-bug" aria-hidden="true"></i>&nbsp;aeSecure</button>';
+                        }
+                    ?>
+                </div>
             </form>
 
             <div id="Result">&nbsp;</div>
-            
+
         </div>
-       
+
         <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.25.3/js/jquery.tablesorter.combined.min.js"></script>
         <script type="text/javascript">
-         
+
 			$(document).ready(function() {
 				$('#cbSubs').select();
-				
-				$('#cbSubs').keydown(function(e) 
+
+				$('#cbSubs').keydown(function(e)
 				{
-					if (e.keyCode == 13) 
+					if (e.keyCode == 13)
 					{
-						$('#btnGetCBPlan').prop("disabled", false).removeClass("hidden");  
+						$('#btnGetCBPlan').prop("disabled", false).removeClass("hidden");
 						$('#btnGetCBPlan').click();
 						$('#btnGetList').click();
 					}
 				});
 
-				$('#rdSubs').keydown(function(e) 
+				$('#rdSubs').keydown(function(e)
 				{
-					if (e.keyCode == 13) 
-					{						
-						$('#btnGetRDProduct').prop("disabled", false).removeClass("hidden"); 
+					if (e.keyCode == 13)
+					{
+						$('#btnGetRDProduct').prop("disabled", false).removeClass("hidden");
 						$('#btnGetRDProduct').click();
 					}
 				});
@@ -1006,22 +909,22 @@ unset($aeSMigrate);
 
 
 			}); // $( document).ready()
-			
+
 			/*
 			 * aeSecure automatisation
 			 */
-			$('#btnaeSecure').click(function(e)  { 
-				
-				e.stopImmediatePropagation(); 
-				
+			$('#btnaeSecure').click(function(e)  {
+
+				e.stopImmediatePropagation();
+
 				// PRO
 				$('#cbSubs').val(8);
 				$('#btnGetList').prop("disabled", false).removeClass("hidden").click();
 				$('#rdSubs').prop("disabled", false).val(6);
 				$('#btnDoIt').prop("disabled", false).removeClass("hidden").click();
-				
+
 				var $html = $html + $('#Result').html();
-				
+
 				// Premium+
 				$('#cbSubs').val(2);
 				$('#btnGetList').prop("disabled", false).removeClass("hidden").click();
@@ -1029,7 +932,7 @@ unset($aeSMigrate);
 				$('#btnDoIt').prop("disabled", false).removeClass("hidden").click();
 
 				var $html = $html + $('#Result').html();
-				
+
 				// Premium
 				$('#cbSubs').val(1);
 				$('#btnGetList').prop("disabled", false).removeClass("hidden").click();
@@ -1037,24 +940,24 @@ unset($aeSMigrate);
 				$('#btnDoIt').prop("disabled", false).removeClass("hidden").click();
 
 				var $html = $html + $('#Result').html();
-				
+
 				$('#Result').html($html);
-				
+
 
 			}); // $('#btnDebug').click()
-			
+
 			/*
 			 * Debug, display tables
 			 */
-			$('#btnDebug').click(function(e)  { 
-				
-				e.stopImmediatePropagation(); 
+			$('#btnDebug').click(function(e)  {
+
+				e.stopImmediatePropagation();
 
 				var $data = new Object;
 				$data.task = "debug";
 
 				$.ajax({
-					beforeSend: function() 
+					beforeSend: function()
 					{
 						$('#Result').html('<div><span class="ajax_loading">&nbsp;</span><span style="font-style:italic;font-size:1.5em;">Please wait...</span></div>');
 					},// beforeSend()
@@ -1063,26 +966,26 @@ unset($aeSMigrate);
 					url: "<?php echo basename(__FILE__); ?>",
 					data:$data,
 					datatype:"html",
-					success: function (data) 
-					{ 
-						$('#Result').html(data);    
+					success: function (data)
+					{
+						$('#Result').html(data);
 					}
-				}); // $.ajax() 
+				}); // $.ajax()
 
 			}); // $('#btnDebug').click()
-			
+
 			/**
 			 * Empty RD tables
 			 */
-			$('#btnEmpty').click(function(e)  { 
-				
-				e.stopImmediatePropagation(); 
+			$('#btnEmpty').click(function(e)  {
+
+				e.stopImmediatePropagation();
 
 				var $data = new Object;
 				$data.task = "empty";
 
 				$.ajax({
-					beforeSend: function() 
+					beforeSend: function()
 					{
 						$('#Result').html('<div><span class="ajax_loading">&nbsp;</span><span style="font-style:italic;font-size:1.5em;">Please wait...</span></div>');
 					},// beforeSend()
@@ -1091,27 +994,27 @@ unset($aeSMigrate);
 					url: "<?php echo basename(__FILE__); ?>",
 					data:$data,
 					datatype:"html",
-					success: function (data) 
-					{ 
-						$('#Result').html(data);    
+					success: function (data)
+					{
+						$('#Result').html(data);
 					}
-				}); // $.ajax() 
+				}); // $.ajax()
 
 			}); // $('#btnEmpty').click()
-			
+
 			/*
 			 * Retrieve the list of customers, current subscriptions in CB Subs
 			 */
-			$('#btnGetList').click(function(e)  { 
-				
-				e.stopImmediatePropagation(); 
+			$('#btnGetList').click(function(e)  {
+
+				e.stopImmediatePropagation();
 
 				var $data = new Object;
 				$data.task = "getList";
 				$data.cbSubs = $('#cbSubs').val();
 
 				$.ajax({
-					beforeSend: function() 
+					beforeSend: function()
 					{
 						$('#Result').html('<div><span class="ajax_loading">&nbsp;</span><span style="font-style:italic;font-size:1.5em;">Please wait...</span></div>');
 					},// beforeSend()
@@ -1120,21 +1023,21 @@ unset($aeSMigrate);
 					url: "<?php echo basename(__FILE__); ?>",
 					data:$data,
 					datatype:"html",
-					success: function (data) 
-					{ 
-						$('#Result').html(data);    
+					success: function (data)
+					{
+						$('#Result').html(data);
 						$('#rdSubs').prop("disabled", false).select();
-						$('#btnGetProduct').prop("disabled", false);				  
+						$('#btnGetProduct').prop("disabled", false);
 						initTableSort();
 					}
-				}); // $.ajax() 
+				}); // $.ajax()
 
 			}); // $('#btnGetList').click()
-			
+
 			/*
 			 * Make the list of customers sortable
 			 */
-			function initTableSort() 
+			function initTableSort()
 			{
 
 				$("#tbl").tablesorter(
@@ -1143,7 +1046,7 @@ unset($aeSMigrate);
 					widthFixed: false,
 					sortMultiSortKey: "shiftKey",
 					sortResetKey: "ctrlKey",
-					headers: 
+					headers:
 					{
 						0: {sorter: "digit"}, // Table name
 						1: {sorter: "text"}, // Table name
@@ -1160,20 +1063,20 @@ unset($aeSMigrate);
 					widgetOptions: {
 						uitheme: "ice",
 						filter_columnFilters: false
-					},               
+					},
 					sortList: [[4,1]]  // Sort by default on the table name
 				});
 
 
 			} // function initTableSort()
-			
+
 			/*
 			 * Retrieve the name of the CBSubs plan
 			 */
 			$('#btnGetCBPlan').click(function (e)
 			{
-				
-				e.stopImmediatePropagation(); 
+
+				e.stopImmediatePropagation();
 
 				var $data = new Object;
 				$data.task = "getPlan";
@@ -1186,25 +1089,25 @@ unset($aeSMigrate);
 					url: "<?php echo basename(__FILE__); ?>",
 					data:$data,
 					datatype:"html",
-					success: function (data) { 
+					success: function (data) {
 						$('#PlanName').html(data);
-						if(data!=='unknown') 
+						if(data!=='unknown')
 						{
-							$('#btnGetList').prop("disabled", false).removeClass("hidden");  
+							$('#btnGetList').prop("disabled", false).removeClass("hidden");
 						} else {
-							$('#btnGetList').prop("disabled", true).addClass("hidden");  
+							$('#btnGetList').prop("disabled", true).addClass("hidden");
 						}
 					}
-				}); // $.ajax() 			
-			}); // $('#btnGetCBPlan').click() 
-			
+				}); // $.ajax()
+			}); // $('#btnGetCBPlan').click()
+
 			/*
 			 * Retrieve the name of the RD-Subs product
 			 */
 			$('#btnGetRDProduct').click(function (e)
 			{
-				
-				e.stopImmediatePropagation(); 
+
+				e.stopImmediatePropagation();
 
 				var $data = new Object;
 				$data.task = "getProduct";
@@ -1217,24 +1120,24 @@ unset($aeSMigrate);
 					url: "<?php echo basename(__FILE__); ?>",
 					data:$data,
 					datatype:"html",
-					success: function (data) { 
+					success: function (data) {
 						$('#ProductName').html(data);
-						if(data!=='unknown') 
+						if(data!=='unknown')
 						{
-							$('#btnDoIt').prop("disabled", false).removeClass("hidden");  
+							$('#btnDoIt').prop("disabled", false).removeClass("hidden");
 						} else {
-							$('#btnDoIt').prop("disabled", true).addClass("hidden");  
+							$('#btnDoIt').prop("disabled", true).addClass("hidden");
 						}
 					}
-				}); // $.ajax() 			
-			}); // $('#btnGetProduct').click()   
+				}); // $.ajax()
+			}); // $('#btnGetProduct').click()
 
 			/*
 			 * Do it, migrate
-			 */			
-			$('#btnDoIt').click(function(e)  { 
+			 */
+			$('#btnDoIt').click(function(e)  {
 
-				e.stopImmediatePropagation(); 
+				e.stopImmediatePropagation();
 
 				var $data = new Object;
 				$data.task = "doIt";
@@ -1245,33 +1148,33 @@ unset($aeSMigrate);
 
 					beforeSend: function() {
 						$('#Result').html('<div><span class="ajax_loading">&nbsp;</span><span style="font-style:italic;font-size:1.5em;">Please wait...</span></div>');
-						$('#btnKillMe').prop("disabled", true); 
-						$('#btnGetList').prop("disabled", true);  
-						$('#btnGetProduct').prop("disabled", true);    
+						$('#btnKillMe').prop("disabled", true);
+						$('#btnGetList').prop("disabled", true);
+						$('#btnGetProduct').prop("disabled", true);
 						$('#btnDoIt').prop("disabled", true);
-						$('#cbSubs').prop("disabled", true);        
-						$('#rdSubs').prop("disabled", true);       
-					},// beforeSend()               
+						$('#cbSubs').prop("disabled", true);
+						$('#rdSubs').prop("disabled", true);
+					},// beforeSend()
 					async:true,
 					type:"GET",
 					url: "<?php echo basename(__FILE__); ?>",
 					data:$data,
 					datatype:"html",
-					success: function (data) { 
+					success: function (data) {
 
-						$('#btnGetList').prop("disabled", false);  
-						$('#btnGetProduct').prop("disabled", false);    
-						$('#btnKillMe').prop("disabled", false); 
+						$('#btnGetList').prop("disabled", false);
+						$('#btnGetProduct').prop("disabled", false);
+						$('#btnKillMe').prop("disabled", false);
 						$('#btnDoIt').prop("disabled", false);
-						$('#cbSubs').prop("disabled", false);        
-						$('#rdSubs').prop("disabled", false);       
+						$('#cbSubs').prop("disabled", false);
+						$('#rdSubs').prop("disabled", false);
 
-						$('#Result').html(data);    
+						$('#Result').html(data);
 
 					}, // success
-					error: function(Request, textStatus, errorThrown) 
+					error: function(Request, textStatus, errorThrown)
 					{
-						$('#btnKillMe').prop("disabled", false); 
+						$('#btnKillMe').prop("disabled", false);
 						$('#btnDoIt').prop("disabled", false);
 						// Display an error message to inform the user about the problem
 						var $msg = '<div class="bg-danger text-danger img-rounded" style="margin-top:25px;padding:10px;">';
@@ -1284,13 +1187,13 @@ unset($aeSMigrate);
 						$msg = $msg + 'URL that has returned the error : <a target="_blank" href="'+$url+'">'+$url+'</a><br/><br/>';
 						$msg = $msg + '</div>';
 						$('#Result').html($msg);
-					} // error                 
+					} // error
 				}); // $.ajax()
 			}); // $('#btnDoIt').click()
-			 
+
 			// Remove this script
-			$('#btnKillMe').click(function(e)  { 
-			   e.stopImmediatePropagation(); 
+			$('#btnKillMe').click(function(e)  {
+			   e.stopImmediatePropagation();
 
 			   var $data = new Object;
 			   $data.task = "killMe";
@@ -1298,21 +1201,21 @@ unset($aeSMigrate);
 			   $.ajax({
 				  beforeSend: function() {
 					 $('#Result').empty();
-					 $('#btnKillSelected').prop("disabled", true); 
-					 $('#btnKillMe').prop("disabled", true);                            
+					 $('#btnKillSelected').prop("disabled", true);
+					 $('#btnKillMe').prop("disabled", true);
 				  },// beforeSend()
 				  async:true,
 				  type:"POST",
 				  url: "<?php echo basename(__FILE__); ?>",
 				  data:$data,
 				  datatype:"html",
-				  success: function (data) { 
+				  success: function (data) {
 					 $('#form').remove();
-					 $('#Result').html(data);     
+					 $('#Result').html(data);
 				  }
 			   }); // $.ajax()
-			}); // $('#KillMe').click()   
+			}); // $('#KillMe').click()
 		</script>
-      
+
 	</body>
 </html>
